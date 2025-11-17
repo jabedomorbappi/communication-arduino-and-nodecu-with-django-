@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle IoT Live Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f0f2f5; padding:20px; }
+        .lcd-container { display:flex; justify-content:space-around; flex-wrap: wrap; margin-bottom:20px; }
+        .lcd-card { background:#222; color:#0f0; padding:15px; border-radius:10px; width:150px; text-align:center; box-shadow:0 0 10px #000; margin:5px; }
+        .slider-container { margin-top:10px; }
+        .slider { width:100%; height:15px; border-radius:8px; background:#ddd; overflow:hidden; }
+        .slider-fill { height:100%; width:0%; background:#4CAF50; transition: width 0.5s; }
+        button { margin:10px 0; padding:10px 15px; border:none; background:#4CAF50; color:white; cursor:pointer; border-radius:5px; }
+        #history { display:none; margin-top:20px; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        tbody { display: block; height: 200px; overflow-y: auto; }
+        thead, tbody tr { display: table; width: 100%; table-layout: fixed; }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align:center;">Vehicle IoT Live Dashboard</h1>
+
+<div class="lcd-container">
+    <div class="lcd-card">
+        IR1: <span id="ir1-value">0</span>
+        <div class="slider-container">
+            <div class="slider"><div id="ir1-slider" class="slider-fill"></div></div>
+        </div>
+    </div>
+    <div class="lcd-card">
+        IR2: <span id="ir2-value">0</span>
+        <div class="slider-container">
+            <div class="slider"><div id="ir2-slider" class="slider-fill"></div></div>
+        </div>
+    </div>
+    <div class="lcd-card">
+        Piezo: <span id="piezo-value">0</span>V
+        <div class="slider-container">
+            <div class="slider"><div id="piezo-slider" class="slider-fill"></div></div>
+        </div>
+    </div>
+    <div class="lcd-card">
+        Relay: <span id="relay-value">OFF</span>
+        <div class="slider-container">
+            <div class="slider"><div id="relay-slider" class="slider-fill"></div></div>
+        </div>
+    </div>
+    <div class="lcd-card">
+        Speed: <span id="speed-value">0</span> km/h
+        <div class="slider-container">
+            <div class="slider"><div id="speed-slider" class="slider-fill"></div></div>
+        </div>
+    </div>
+</div>
+
+<button onclick="toggleHistory()">Show / Hide Previous Data</button>
+
+<div id="history">
+    <h2>Historical Data Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>IR1</th>
+                <th>IR2</th>
+                <th>Piezo</th>
+                <th>Relay</th>
+                <th>Speed</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- Data will be populated via JS -->
+        </tbody>
+    </table>
+
+    <h2>Charts (Last 5 Minutes)</h2>
+    <canvas id="irChart" width="900" height="300"></canvas>
+    <canvas id="piezoChart" width="900" height="300"></canvas>
+    <canvas id="speedChart" width="900" height="300"></canvas>
+</div>
+
+<script>
+function toggleHistory() {
+    const div = document.getElementById("history");
+    div.style.display = div.style.display === "none" ? "block" : "none";
+}
+
+// Update top panel sliders
+function updateTopPanel(data) {
+    document.getElementById("ir1-value").textContent = data.ir1;
+    document.getElementById("ir2-value").textContent = data.ir2;
+    document.getElementById("piezo-value").textContent = data.piezo.toFixed(2);
+    document.getElementById("relay-value").textContent = data.relay ? "ON" : "OFF";
+    document.getElementById("speed-value").textContent = data.speed;
+
+    document.getElementById("ir1-slider").style.width = data.ir1*100 + "%";
+    document.getElementById("ir2-slider").style.width = data.ir2*100 + "%";
+    document.getElementById("piezo-slider").style.width = (data.piezo/5*100) + "%";
+    document.getElementById("relay-slider").style.width = data.relay ? "100%" : "0%";
+    document.getElementById("speed-slider").style.width = Math.min(data.speed/200*100, 100) + "%";
+}
+
+// Update table and charts
+let irChart, piezoChart, speedChart;
+function updateRecentData() {
+    fetch('/api/recent/')
+    .then(res => res.json())
+    .then(data => {
+        // Update table
+        const tbody = document.getElementById("table-body");
+        tbody.innerHTML = "";
+        data.table_rows.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.device}</td>
+                <td>${row.ir1}</td>
+                <td>${row.ir2}</td>
+                <td>${row.piezo}</td>
+                <td>${row.relay ? "ON" : "OFF"}</td>
+                <td>${row.speed}</td>
+                <td>${row.timestamp}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Update charts
+        if(!irChart){
+            irChart = new Chart(document.getElementById("irChart"), {
+                type:'line',
+                data:{labels:data.timestamps,datasets:[
+                    {label:"IR1", data:data.ir1, borderColor:"red", fill:false},
+                    {label:"IR2", data:data.ir2, borderColor:"blue", fill:false}
+                ]},
+                options:{responsive:true, plugins:{title:{display:true,text:"IR Sensors"}}}
+            });
+
+            piezoChart = new Chart(document.getElementById("piezoChart"), {
+                type:'line',
+                data:{labels:data.timestamps,datasets:[
+                    {label:"Piezo Voltage", data:data.piezo, borderColor:"green", fill:false}
+                ]},
+                options:{responsive:true, plugins:{title:{display:true,text:"Piezo Sensor"}}}
+            });
+
+            speedChart = new Chart(document.getElementById("speedChart"), {
+                type:'line',
+                data:{labels:data.timestamps,datasets:[
+                    {label:"Speed", data:data.speed, borderColor:"orange", fill:false}
+                ]},
+                options:{responsive:true, plugins:{title:{display:true,text:"Vehicle Speed"}}}
+            });
+        } else {
+            irChart.data.labels = data.timestamps;
+            irChart.data.datasets[0].data = data.ir1;
+            irChart.data.datasets[1].data = data.ir2;
+            irChart.update();
+
+            piezoChart.data.labels = data.timestamps;
+            piezoChart.data.datasets[0].data = data.piezo;
+            piezoChart.update();
+
+            speedChart.data.labels = data.timestamps;
+            speedChart.data.datasets[0].data = data.speed;
+            speedChart.update();
+        }
+    });
+}
+
+// Fetch top panel every 2s
+setInterval(() => {
+    fetch('/api/latest/')
+    .then(res => res.json())
+    .then(updateTopPanel)
+    .catch(err=>console.error(err));
+}, 2000);
+
+// Fetch historical data every 5s
+setInterval(updateRecentData, 5000);
+
+// Initial load
+updateRecentData();
+
+</script>
+</body>
+</html>

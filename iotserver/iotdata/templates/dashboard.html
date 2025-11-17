@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vehicle IoT Dashboard</title>
+
+  <meta http-equiv="refresh" content="5">
+
+  <style>
+    body{font-family:Arial;}
+    table{width:90%;border-collapse:collapse;margin:auto;}
+    th,td{padding:10px;border:1px solid #ddd;text-align:center;}
+    th{background:#007bff;color:white;}
+  </style>
+</head>
+<body>
+<h1 style="text-align:center;">Vehicle IoT Dashboard</h1>
+<div style="height:400px; overflow-y:auto;">
+<table>
+<tr>
+<th>Device</th><th>IR1</th><th>IR2</th><th>Piezo</th><th>Relay</th><th>Speed</th><th>Timestamp</th>
+</tr>
+{% for d in data %}
+<tr>
+<td>{{ d.device }}</td>
+<td>{{ d.ir1 }}</td>
+<td>{{ d.ir2 }}</td>
+<td>{{ d.piezo }}</td>
+<td>{{ d.relay }}</td>
+<td>{{ d.speed }}</td>
+<td>{{ d.timestamp }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+
+</body>
+</html>

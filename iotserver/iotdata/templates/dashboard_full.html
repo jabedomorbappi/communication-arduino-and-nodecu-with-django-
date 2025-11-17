@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle IoT Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta http-equiv="refresh" content="5"> <!-- Auto-refresh -->
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        tbody { display: block; height: 200px; overflow-y: auto; }
+        thead, tbody tr { display: table; width: 100%; table-layout: fixed; }
+    </style>
+</head>
+<body>
+<h1 style="text-align:center;">Vehicle IoT Dashboard</h1>
+
+<h2>Latest Data Table</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Device</th>
+            <th>IR1</th>
+            <th>IR2</th>
+            <th>Piezo</th>
+            <th>Relay</th>
+            <th>Speed</th>
+            <th>Timestamp</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in table_data %}
+        <tr>
+            <td>{{ d.device }}</td>
+            <td>{{ d.ir1 }}</td>
+            <td>{{ d.ir2 }}</td>
+            <td>{{ d.piezo }}</td>
+            <td>{{ d.relay }}</td>
+            <td>{{ d.speed }}</td>
+            <td>{{ d.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Charts (Last 5 Minutes)</h2>
+<canvas id="irChart" width="900" height="300"></canvas>
+<canvas id="piezoChart" width="900" height="300"></canvas>
+<canvas id="speedChart" width="900" height="300"></canvas>
+
+<!-- Pass Django Python lists safely to JS -->
+{{ timestamps|json_script:"timestamps-data" }}
+{{ ir1_data|json_script:"ir1-data" }}
+{{ ir2_data|json_script:"ir2-data" }}
+{{ piezo_data|json_script:"piezo-data" }}
+{{ speed_data|json_script:"speed-data" }}
+
+<script>
+const timestamps = JSON.parse(document.getElementById('timestamps-data').textContent);
+const ir1 = JSON.parse(document.getElementById('ir1-data').textContent);
+const ir2 = JSON.parse(document.getElementById('ir2-data').textContent);
+const piezo = JSON.parse(document.getElementById('piezo-data').textContent);
+const speed = JSON.parse(document.getElementById('speed-data').textContent);
+
+// IR Chart
+new Chart(document.getElementById("irChart"), {
+    type: 'line',
+    data: {
+        labels: timestamps,
+        datasets: [
+            { label: "IR1", data: ir1, borderColor: "red", fill: false },
+            { label: "IR2", data: ir2, borderColor: "blue", fill: false }
+        ]
+    },
+    options: { responsive: true, plugins: { title: { display: true, text: "IR Sensors" } } }
+});
+
+// Piezo Chart
+new Chart(document.getElementById("piezoChart"), {
+    type: 'line',
+    data: {
+        labels: timestamps,
+        datasets: [
+            { label: "Piezo Voltage", data: piezo, borderColor: "green", fill: false }
+        ]
+    },
+    options: { responsive: true, plugins: { title: { display: true, text: "Piezo Sensor" } } }
+});
+
+// Speed Chart
+new Chart(document.getElementById("speedChart"), {
+    type: 'line',
+    data: {
+        labels: timestamps,
+        datasets: [
+            { label: "Speed", data: speed, borderColor: "orange", fill: false }
+        ]
+    },
+    options: { responsive: true, plugins: { title: { display: true, text: "Vehicle Speed" } } }
+});
+</script>
+</body>
+</html>
