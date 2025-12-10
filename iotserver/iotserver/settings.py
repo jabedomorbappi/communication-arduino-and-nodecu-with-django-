@@ -15,8 +15,8 @@ SECRET_KEY = 'django-insecure-=5*3ugjk_m2ervm46@1l%)hlm$sz8azf5mu^tj37zro0n@+5ce
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.91.94']
-
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.91.94']
+ALLOWED_HOSTS = ['*']    # ← ALLOWS ALL IPS (PERFECT FOR IOT)
 
 
 # Application definition

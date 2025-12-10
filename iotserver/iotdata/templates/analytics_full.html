@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Analytics - Real-Time & Historical</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0a0e17; --card:#111827; --text:#e2e8f0; --muted:#94a3b8; --accent:#00d4ff; --accent2:#7c3aed; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; overflow-x:hidden; }
+
+        .header {
+            text-align:center; padding:60px 20px; background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(124,58,237,0.1));
+            border-bottom:1px solid #1e293b;
+        }
+        .title {
+            font-size:5rem; font-weight:800; background:linear-gradient(90deg,#00d4ff,#7c3aed);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+
+        .controls {
+            text-align:center; margin:60px 0; padding:35px; background:rgba(17,24,39,0.9);
+            border:3px solid var(--accent); border-radius:30px;
+        }
+        select, button {
+            padding:18px 50px; font-size:2rem; margin:0 20px;
+            background:#111827; color:var(--text); border:3px solid var(--accent);
+            border-radius:60px; font-weight:600;
+        }
+        button { background:var(--accent); color:#000; cursor:pointer; }
+        button:hover { transform:scale(1.05); }
+
+        .plot-grid {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(750px,1fr));
+            gap:60px; padding:40px; max-width:2000px; margin:0 auto;
+        }
+        .plot-container {
+            background:var(--card); border-radius:30px; padding:50px;
+            box-shadow:0 30px 60px rgba(0,0,0,0.6); border:1px solid #1e293b;
+            opacity:0; transform:translateY(100px);
+        }
+        .plot-title {
+            text-align:center; font-size:3.2rem; margin-bottom:30px;
+            color:var(--text); font-weight:700;
+        }
+        .loading {
+            text-align:center; font-size:2.5rem; color:var(--muted); padding:100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 class="title">Real-Time IoT Analytics</h1>
+    <p style="font-size:2.5rem;color:var(--muted);margin-top:20px;">
+        Arduino vs NodeMCU • Latency • Speed • Vibration • Full History
+    </p>
+</div>
+
+<div class="controls">
+    <label style="font-size:2.5rem;color:var(--text);margin-right:40px;">Time Range:</label>
+    <select id="timeRange">
+        <option value="5">Last 5 Minutes</option>
+        <option value="10">Last 10 Minutes</option>
+        <option value="30">Last 30 Minutes</option>
+        <option value="60">Last 1 Hour</option>
+        <option value="360">Last 6 Hours</option>
+        <option value="1440">Last 24 Hours</option>
+        <option value="10080">Last 7 Days</option>
+    </select>
+    <button onclick="loadAllData()">UPDATE ALL CHARTS</button>
+</div>
+
+<div id="loading" class="loading">Loading analytics data...</div>
+
+<div class="plot-grid" id="plots">
+    <!-- Plots injected here -->
+</div>
+
+<script>
+let allData = [];
+
+// Load data and create plots
+function loadAllData() {
+    const minutes = document.getElementById("timeRange").value;
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("plots").innerHTML = "";
+
+    fetch(`/api/recent/?minutes=${minutes}`)
+    .then(r => r.json())
+    .then(data => {
+        allData = data.table_rows || [];
+        document.getElementById("loading").style.display = "none";
+
+        if (allData.length === 0) {
+            document.getElementById("plots").innerHTML = "<div class='loading'>No data in selected range</div>";
+            return;
+        }
+
+        createAllPlots();
+        setupScrollAnimations();
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("loading").innerHTML = "Failed to load data";
+    });
+}
+
+// Create all 8 plots
+function createAllPlots() {
+    const container = document.getElementById("plots");
+    container.innerHTML = "";
+
+    const plots = [
+        { id: "ir-comparison", title: "IR Sensors - Arduino vs NodeMCU" },
+        { id: "speed-plot", title: "Vehicle Speed Over Time" },
+        { id: "piezo-plot", title: "Vibration Level (Piezo)" },
+        { id: "relay-states", title: "All Relay States" },
+        { id: "latency-plot", title: "Latency Between Devices" },
+        { id: "speed-gauge", title: "Real-Time Speed Gauge" },
+        { id: "activity-heatmap", title: "Detection Activity Heatmap" },
+        { id: "data-table", title: "Recent Data Table" }
+    ];
+
+    plots.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "plot-container";
+        div.innerHTML = `
+            <div class="plot-title">${p.title}</div>
+            <div id="${p.id}" style="height:600px;"></div>
+        `;
+        container.appendChild(div);
+    });
+
+    const arduino = allData.filter(d => d.source === "arduino");
+    const nodemcu = allData.filter(d => d.source === "nodemcu");
+
+    // 1. IR Comparison
+    Plotly.newPlot('ir-comparison', [
+        { x: arduino.map(d => new Date(d.timestamp)), y: arduino.map(d => d.ir1), name: 'Arduino IR1', line: {color: '#00d4ff'} },
+        { x: arduino.map(d => new Date(d.timestamp)), y: arduino.map(d => d.ir2), name: 'Arduino IR2', line: {color: '#22d3ee'} },
+        { x: nodemcu.map(d => new Date(d.timestamp)), y: nodemcu.map(d => d.ir1), name: 'NodeMCU IR1', line: {color: '#7c3aed'} },
+        { x: nodemcu.map(d => new Date(d.timestamp)), y: nodemcu.map(d => d.ir2), name: 'NodeMCU IR2', line: {color: '#a855f7'} }
+    ], {paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}});
+
+    // 2. Speed
+    Plotly.newPlot('speed-plot', [{
+        x: arduino.map(d => new Date(d.timestamp)),
+        y: arduino.map(d => d.speed),
+        mode: 'lines+markers',
+        line: {color: '#00ff9d', width: 5}
+    }], {paper_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}});
+
+    // 3. Piezo
+    Plotly.newPlot('piezo-plot', [{
+        x: arduino.map(d => new Date(d.timestamp)),
+        y: arduino.map(d => d.piezo),
+        fill: 'tozeroy',
+        fillcolor: 'rgba(0,212,255,0.3)',
+        line: {color: '#00d4ff'}
+    }], {paper_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}});
+
+    // 4. Relays
+    Plotly.newPlot('relay-states', [
+        { x: arduino.map(d => new Date(d.timestamp)), y: arduino.map(d => d.arduino_relay ? 3 : 0), name: 'Arduino Relay', line: {color: '#00d4ff', shape: 'hv'} },
+        { x: nodemcu.map(d => new Date(d.timestamp)), y: nodemcu.map(d => d.nodemcu_relay ? 2 : 0), name: 'NodeMCU Relay', line: {color: '#7c3aed', shape: 'hv'} },
+        { x: arduino.map(d => new Date(d.timestamp)), y: arduino.map(d => d.piezo_relay ? 1 : 0), name: 'Piezo Relay', line: {color: '#10b981', shape: 'hv'} }
+    ], {
+        yaxis: {tickvals: [0,1,2,3], ticktext: ['OFF','Piezo','NodeMCU','Arduino']},
+        paper_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}
+    });
+
+    // 5. Latency
+    let latency = [];
+    for (let a of arduino) {
+        const closest = nodemcu.reduce((p,c) => 
+            Math.abs(new Date(c.timestamp) - new Date(a.timestamp)) < Math.abs(new Date(p.timestamp) - new Date(a.timestamp)) ? c : p, nodemcu[0]||{timestamp:0}
+        );
+        const diff = Math.abs(new Date(a.timestamp) - new Date(closest.timestamp));
+        if (diff < 5000) latency.push({x: new Date(a.timestamp), y: diff});
+    }
+    Plotly.newPlot('latency-plot', [{
+        x: latency.map(d => d.x),
+        y: latency.map(d => d.y),
+        type: 'bar',
+        marker: {color: '#ff0066'}
+    }], {paper_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}});
+
+    // 6. Speed Gauge
+    const latestSpeed = arduino[arduino.length-1]?.speed || 0;
+    Plotly.newPlot('speed-gauge', [{
+        type: 'indicator',
+        mode: 'gauge+number',
+        value: latestSpeed,
+        gauge: { axis: { range: [0, 200] }, bar: { color: latestSpeed > 100 ? "#ef4444" : "#10b981" } }
+    }], {paper_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}});
+
+    // 7. Heatmap
+    Plotly.newPlot('activity-heatmap', [{
+        z: [arduino.map(d => d.ir1 || d.ir2 ? 1 : 0)],
+        x: arduino.map(d => new Date(d.timestamp)),
+        y: ['Detection'],
+        type: 'heatmap',
+        colorscale: 'Viridis'
+    }], {paper_bgcolor:'rgba(0,0,0,0)', font:{color:'#e2e8f0'}});
+
+    // 8. Data Table
+    let table = `<table style="width:100%;border-collapse:collapse;font-size:1.4rem;">
+        <tr style="background:#1e293b;"><th>Time</th><th>Source</th><th>IR1</th><th>IR2</th><th>Piezo</th><th>Speed</th><th>Relays</th></tr>`;
+    allData.slice(-30).reverse().forEach(d => {
+        table += `<tr style="border-bottom:1px solid #333;">
+            <td>${new Date(d.timestamp).toLocaleString()}</td>
+            <td>${d.source.toUpperCase()}</td>
+            <td>${d.ir1}</td><td>${d.ir2}</td>
+            <td>${d.piezo?.toFixed(2)||'-'}</td>
+            <td>${d.speed?.toFixed(1)||'-'}</td>
+            <td>${d.arduino_relay?'A':''}${d.nodemcu_relay?'N':''}${d.piezo_relay?'P':''}</td>
+        </tr>`;
+    });
+    table += `</table>`;
+    document.getElementById("data-table").innerHTML = table;
+}
+
+// SCROLL ANIMATION — PLOTS APPEAR ONE BY ONE
+function setupScrollAnimations() {
+    gsap.utils.toArray(".plot-container").forEach((el, i) => {
+        gsap.fromTo(el, 
+            { opacity: 0, y: 150 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
+            }
+        );
+    });
+}
+
+// Load on start + auto-refresh
+loadAllData();
+setInterval(loadAllData, 15000);
+</script>
+
+</body>
+</html>

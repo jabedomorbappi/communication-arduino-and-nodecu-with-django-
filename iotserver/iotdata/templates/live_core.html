@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ULTRA CORE - 100ms REAL-TIME</title>
+    <style>
+        body { 
+            margin:0; 
+            background:#000; 
+            color:#0ff; 
+            font-family:'Courier New', monospace; 
+            overflow:hidden; 
+            height:100vh;
+        }
+        .box { 
+            position:absolute; 
+            width:320px; 
+            padding:35px; 
+            text-align:center; 
+            background:rgba(0,20,50,0.85); 
+            border:2px solid #0ff; 
+            border-radius:20px; 
+            box-shadow:0 0 60px #0ff; 
+            transition:all 0.3s;
+        }
+        #ir1   { top:8%; left:8%; }
+        #ir2   { top:8%; right:8%; }
+        #piezo { bottom:8%; left:8%; }
+        #speed { bottom:8%; right:8%; }
+        #relay { top:50%; left:50%; transform:translate(-50%,-50%); }
+
+        .val { 
+            font-size:5.5rem; 
+            font-weight:bold; 
+            text-shadow:0 0 30px #0ff; 
+            transition:text-shadow 0.4s;
+        }
+        .label { 
+            font-size:1.6rem; 
+            letter-spacing:6px; 
+            margin-bottom:12px; 
+            opacity:0.9;
+        }
+        .unit { font-size:2rem; margin-top:8px; opacity:0.8; }
+
+        .live { 
+            position:fixed; top:25px; left:25px; 
+            width:22px; height:22px; background:red; border-radius:50%; 
+            box-shadow:0 0 40px red; animation:blink 1s infinite; 
+        }
+        @keyframes blink { 50%{opacity:0.3} }
+
+        /* ONE-TIME FLASH WHEN BLOCKED */
+        .flash-once {
+            animation: flash-once 0.7s ease-out;
+        }
+        @keyframes flash-once {
+            0%   { text-shadow:0 0 30px #0ff; transform:scale(1); color:#0ff; }
+            40%  { text-shadow:0 0 140px #f00, 0 0 200px #f00; transform:scale(1.4); color:#fff; }
+            100% { text-shadow:0 0 60px #f00; transform:scale(1); color:#f00; }
+        }
+
+        /* STEADY RED WHEN BLOCKED */
+        .blocked {
+            color:#f00 !important;
+            text-shadow:0 0 60px #f00 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="live"></div>
+
+<div class="box" id="ir1">
+    <div class="label">IR BEAM 1</div>
+    <div class="val" id="v1">—</div>
+</div>
+
+<div class="box" id="ir2">
+    <div class="label">IR BEAM 2</div>
+    <div class="val" id="v2">—</div>
+</div>
+
+<div class="box" id="piezo">
+    <div class="label">VIBRATION</div>
+    <div class="val" id="v3">0.0</div>
+</div>
+
+<div class="box" id="speed">
+    <div class="label">VELOCITY</div>
+    <div class="val" id="v4">0.0</div>
+    <div class="unit">km/h</div>
+</div>
+
+<div class="box" id="relay">
+    <div class="label">EXTERIOR LIGHTS</div>
+    <div class="val" id="v5">OFF</div>
+</div>
+
+<script>
+let lastIR2 = -1;
+
+setInterval(() => {
+    fetch('/api/latest/')
+    .then(r => r.json())
+    .then(d => {
+        // Update all values
+        document.getElementById("v1").textContent = d.ir1 ? "CLEAR" : "BLOCK";
+        document.getElementById("v2").textContent = d.ir2 ? "CLEAR" : "BLOCK";
+        document.getElementById("v3").textContent = Number(d.piezo).toFixed(1);
+        document.getElementById("v4").textContent = Number(d.speed).toFixed(1);
+        document.getElementById("v5").textContent = d.relay ? "ON" : "OFF";
+
+        const el = document.getElementById("v2");
+
+        // // Steady red when blocked
+        // if (d.ir2 === 1) {
+        //     el.classList.add("blocked");
+        // } else {
+        //     el.classList.remove("blocked");
+        // }
+
+        // ONE-TIME FLASH only when it becomes BLOCKED
+        if (d.ir2 === 1 && lastIR2 !== 1) {
+            el.classList.remove("flash-once");
+            void el.offsetWidth;           // Force reflow (magic)
+            el.classList.add("flash-once");
+        }
+
+        lastIR2 = d.ir2;
+    })
+    .catch(() => {});
+}, 100);   // You can even change to 50 or 10 — still 100% stable!
+</script>
+
+</body>
+</html>

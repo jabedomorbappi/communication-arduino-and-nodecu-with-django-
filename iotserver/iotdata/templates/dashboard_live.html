@@ -1,189 +1,198 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Vehicle IoT Live Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle IoT Control & Analytics Center</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; background:#f0f2f5; padding:20px; }
-        .lcd-container { display:flex; justify-content:space-around; flex-wrap: wrap; margin-bottom:20px; }
-        .lcd-card { background:#222; color:#0f0; padding:15px; border-radius:10px; width:150px; text-align:center; box-shadow:0 0 10px #000; margin:5px; }
-        .slider-container { margin-top:10px; }
-        .slider { width:100%; height:15px; border-radius:8px; background:#ddd; overflow:hidden; }
-        .slider-fill { height:100%; width:0%; background:#4CAF50; transition: width 0.5s; }
-        button { margin:10px 0; padding:10px 15px; border:none; background:#4CAF50; color:white; cursor:pointer; border-radius:5px; }
-        #history { display:none; margin-top:20px; }
-        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #4CAF50; color: white; }
-        tbody { display: block; height: 200px; overflow-y: auto; }
-        thead, tbody tr { display: table; width: 100%; table-layout: fixed; }
+        :root { --cyan: #00ffff; --magenta: #ff00ff; --bg: #000814; }
+        body { margin:0; background:var(--bg); color:var(--cyan); font-family:'Rajdhani',sans-serif; overflow-x:hidden; }
+        
+        /* UNIVERSITY HEADER */
+        .header { background:linear-gradient(135deg,#001233,#003366); padding:20px 0; border-bottom:4px solid var(--cyan); box-shadow:0 0 40px var(--cyan); }
+        .logo { height:90px; border-radius:15px; border:3px solid var(--cyan); box-shadow:0 0 30px var(--cyan); }
+        .uni-name { font-family:'Orbitron'; font-size:2.8rem; font-weight:900; letter-spacing:6px; text-shadow:0 0 30px var(--cyan); }
+        .project-title { font-size:2.2rem; color:#0f0; text-shadow:0 0 20px #0f0; margin:10px 0; }
+        .supervisor { font-size:1.3rem; opacity:0.9; }
+
+        /* MAIN CONTENT */
+        .glass { background:rgba(10,30,60,0.7); border-radius:20px; border:2px solid var(--cyan); backdrop-filter:blur(15px); box-shadow:0 0 50px rgba(0,255,255,0.4); }
+        .lcd { background:linear-gradient(135deg,#0a1a3f,#002a3f); color:#00ffea; text-shadow:0 0 25px #00ffea; border:2px solid #00ffea60; box-shadow:0 0 40px rgba(0,255,234,0.6); }
+        .progress { height:12px; background:#111; border-radius:10px; overflow:hidden; }
+        .progress-bar { background:linear-gradient(90deg,#00ffea,#00d4ff,#8b00ff); background-size:300%; animation:shimmer 4s infinite; box-shadow:0 0 30px #00ffea; }
+        @keyframes shimmer { 0%{background-position:0%} 100%{background-position:300%} }
+
+        /* SWITCH */
+        .switch { position:relative; display:inline-block; width:120px; height:60px; }
+        .switch input { opacity:0; width:0; height:0; }
+        .slider { position:absolute; cursor:pointer; inset:0; background:#333; border-radius:60px; transition:.4s; box-shadow:inset 0 0 15px #000; }
+        .slider:before { position:absolute; content:""; height:52px; width:52px; left:4px; bottom:4px; background:linear-gradient(#fff,#ccc); border-radius:50%; transition:.4s; }
+        input:checked + .slider { background:#00ff9d; box-shadow:0 0 40px #00ff9d; }
+        input:checked + .slider:before { transform:translateX(60px); }
+        .slider:after { content:'OFF'; color:white; position:absolute; top:50%; left:25px; transform:translateY(-50%); font-weight:bold; }
+        input:checked + .slider:after { content:'ON'; left:70px; }
+
+        /* TEAM MODAL */
+        .team-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.97); z-index:9999; align-items:center; justify-content:center; }
+        .modal-content { background:#001122; border:3px solid var(--cyan); border-radius:25px; padding:40px; max-width:1000px; box-shadow:0 0 80px var(--cyan); }
+        .member { background:rgba(0,255,255,0.05); border-left:5px solid var(--cyan); padding:18px; margin:15px 0; border-radius:0 15px 15px 0; font-size:1.1rem; }
+
+        .glow { text-shadow:0 0 30px var(--cyan); animation:pulse 3s infinite; }
+        @keyframes pulse { 50%{text-shadow:0 0 50px var(--cyan)} }
     </style>
 </head>
 <body>
 
-<h1 style="text-align:center;">Vehicle IoT Live Dashboard</h1>
-
-<div class="lcd-container">
-    <div class="lcd-card">
-        IR1: <span id="ir1-value">0</span>
-        <div class="slider-container">
-            <div class="slider"><div id="ir1-slider" class="slider-fill"></div></div>
-        </div>
-    </div>
-    <div class="lcd-card">
-        IR2: <span id="ir2-value">0</span>
-        <div class="slider-container">
-            <div class="slider"><div id="ir2-slider" class="slider-fill"></div></div>
-        </div>
-    </div>
-    <div class="lcd-card">
-        Piezo: <span id="piezo-value">0</span>V
-        <div class="slider-container">
-            <div class="slider"><div id="piezo-slider" class="slider-fill"></div></div>
-        </div>
-    </div>
-    <div class="lcd-card">
-        Relay: <span id="relay-value">OFF</span>
-        <div class="slider-container">
-            <div class="slider"><div id="relay-slider" class="slider-fill"></div></div>
-        </div>
-    </div>
-    <div class="lcd-card">
-        Speed: <span id="speed-value">0</span> km/h
-        <div class="slider-container">
-            <div class="slider"><div id="speed-slider" class="slider-fill"></div></div>
+<!-- UNIVERSITY HEADER -->
+<div class="header text-center">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-2">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/81/Port_City_International_University_Logo.png" alt="University Logo" class="logo">
+            </div>
+            <div class="col-md-8">
+                <div class="uni-name">Port City International University</div>
+                <div class="project-title">A Django-Integrated IoT Framework
+for Piezoelectric Energy Harvesting
+and Speed Monitoring in
+Bluetooth-Controlled RC Vehicles</div>
+                <div class="supervisor">Supervisor: Akib Jayed Islam <br> Dept. of Electrical and ELectronics Engineering</div>
+            </div>
+            <div class="col-md-2 text-end">
+                <button class="btn btn-outline-info team-btn" onclick="document.getElementById('teamModal').style.display='flex'">
+                    GROUP MEMBERS
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<button onclick="toggleHistory()">Show / Hide Previous Data</button>
+<div class="container-fluid mt-4 px-5">
 
-<div id="history">
-    <h2>Historical Data Table</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Device</th>
-                <th>IR1</th>
-                <th>IR2</th>
-                <th>Piezo</th>
-                <th>Relay</th>
-                <th>Speed</th>
-                <th>Timestamp</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            <!-- Data will be populated via JS -->
-        </tbody>
-    </table>
+    <h1 class="text-center mb-5 glow display-3">VEHICLE IoT LIVE CONTROL</h1>
 
-    <h2>Charts (Last 5 Minutes)</h2>
-    <canvas id="irChart" width="900" height="300"></canvas>
-    <canvas id="piezoChart" width="900" height="300"></canvas>
-    <canvas id="speedChart" width="900" height="300"></canvas>
+    <!-- STATUS & LIGHT CONTROL -->
+    <div class="row mb-5 glass p-4 rounded-4">
+        <div class="col-md-8 d-flex align-items-center">
+            <h2>SYSTEM STATUS: <span id="status" class="badge bg-warning fs-3 px-4 py-2">INITIALIZING...</span></h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <h3>EXTERIOR LIGHTS:
+                <label class="switch ms-4">
+                    <input type="checkbox" id="lightSwitch">
+                    <span class="slider round"></span>
+                </label>
+            </h3>
+        </div>
+    </div>
+
+    <!-- LIVE DATA CARDS -->
+    <div class="row g-4 mb-5" id="lcd-container">
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>IR1</h4><h1 id="ir1">—</h1><div class="progress mt-4"><div class="progress-bar" id="ir1-bar" style="width:0%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>IR2</h4><h1 id="ir2">—</h1><div class="progress mt-4"><div class="progress-bar bg-info" id="ir2-bar" style="width:0%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>VIBRATION</h4><h1 id="piezo">0.00</h1><div class="progress mt-4"><div class="progress-bar bg-warning" id="piezo-bar" style="width:0%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>SPEED</h4><h1 id="speed">0</h1><div class="progress mt-4"><div class="progress-bar bg-danger" id="speed-bar" style="width:0%"></div></div><small>km/h</small></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>LIGHT</h4><h1 id="relay">OFF</h1><div class="progress mt-4"><div class="progress-bar bg-primary" id="relay-bar" style="width:0%"></div></div></div></div>
+    </div>
+
+    <div class="text-center my-5">
+        <button class="btn btn-lg btn-outline-info px-5 py-4 fs-3 glow" id="open-analytics">
+            LAUNCH FULL ANALYTICS
+        </button>
+    </div>
+
+    <!-- ANALYTICS SECTION (hidden until clicked) -->
+    <div id="analytics" style="display:none;" class="mt-5">
+        <!-- Your plots will go here -->
+        <div class="plot-container" id="plot-speed" style="height:500px;"></div>
+        <!-- Add more plots if you want -->
+    </div>
+</div>
+
+<!-- TEAM MEMBERS MODAL -->
+<div id="teamModal" class="team-modal">
+    <div class="modal-content">
+        <h2 class="text-center glow mb-5" style="font-size:3.5rem;">GROUP MEMBERS</h2>
+        <div class="row">
+            <div class="col-md-6 member"><strong>1. Md. Jabed Hossain</strong><br>Roll: 2000123<br>Hardware & Arduino</div>
+            <div class="col-md-6 member"><strong>2. Ikra Binte Islam</strong><br>Roll: 2000124<br>Web Dashboard & Django</div>
+            <div class="col-md-6 member"><strong>3. Rahim Uddin</strong><br>Roll: 2000125<br>ESP8266 & Communication</div>
+            <div class="col-md-6 member"><strong>4. Fatima Akter</strong><br>Roll: 2000126<br>Sensor & Algorithm</div>
+            <div class="col-md-6 member"><strong>5. Karim Rahman</strong><br>Roll: 2000127<br>Real-time System</div>
+            <div class="col-md-6 member"><strong>6. Ayesha Siddika</strong><br>Roll: 2000128<br>UI/UX Design</div>
+            <div class="col-md-6 member"><strong>7. Sahil Ahmed</strong><br>Roll: 2000129<br>Database & Backend</div>
+            <div class="col-md-6 member"><strong>8. Nusrat Jahan</strong><br>Roll: 2000130<br>Documentation</div>
+        </div>
+        <div class="text-center mt-5">
+            <button onclick="document.getElementById('teamModal').style.display='none'" 
+                    style="background:var(--cyan);color:#000;padding:15px 40px;border:none;border-radius:50px;font-size:1.5rem;font-weight:bold;">
+                CLOSE
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
-function toggleHistory() {
-    const div = document.getElementById("history");
-    div.style.display = div.style.display === "none" ? "block" : "none";
-}
+// GSAP Entrance
+gsap.from(".header", { y:-100, opacity:0, duration:1.5, ease:"bounce.out" });
+gsap.from(".glass", { opacity:0, y:100, stagger:0.2, duration:1.5, delay:0.5 });
 
-// Update top panel sliders
-function updateTopPanel(data) {
-    document.getElementById("ir1-value").textContent = data.ir1;
-    document.getElementById("ir2-value").textContent = data.ir2;
-    document.getElementById("piezo-value").textContent = data.piezo.toFixed(2);
-    document.getElementById("relay-value").textContent = data.relay ? "ON" : "OFF";
-    document.getElementById("speed-value").textContent = data.speed;
+document.getElementById("open-analytics").onclick = () => {
+    document.getElementById("analytics").style.display = "block";
+    gsap.from("#analytics > *", { opacity:0, y:100, stagger:0.2, duration:1.2 });
+};
 
-    document.getElementById("ir1-slider").style.width = data.ir1*100 + "%";
-    document.getElementById("ir2-slider").style.width = data.ir2*100 + "%";
-    document.getElementById("piezo-slider").style.width = (data.piezo/5*100) + "%";
-    document.getElementById("relay-slider").style.width = data.relay ? "100%" : "0%";
-    document.getElementById("speed-slider").style.width = Math.min(data.speed/200*100, 100) + "%";
-}
-
-// Update table and charts
-let irChart, piezoChart, speedChart;
-function updateRecentData() {
-    fetch('/api/recent/')
-    .then(res => res.json())
-    .then(data => {
-        // Update table
-        const tbody = document.getElementById("table-body");
-        tbody.innerHTML = "";
-        data.table_rows.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.device}</td>
-                <td>${row.ir1}</td>
-                <td>${row.ir2}</td>
-                <td>${row.piezo}</td>
-                <td>${row.relay ? "ON" : "OFF"}</td>
-                <td>${row.speed}</td>
-                <td>${row.timestamp}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // Update charts
-        if(!irChart){
-            irChart = new Chart(document.getElementById("irChart"), {
-                type:'line',
-                data:{labels:data.timestamps,datasets:[
-                    {label:"IR1", data:data.ir1, borderColor:"red", fill:false},
-                    {label:"IR2", data:data.ir2, borderColor:"blue", fill:false}
-                ]},
-                options:{responsive:true, plugins:{title:{display:true,text:"IR Sensors"}}}
-            });
-
-            piezoChart = new Chart(document.getElementById("piezoChart"), {
-                type:'line',
-                data:{labels:data.timestamps,datasets:[
-                    {label:"Piezo Voltage", data:data.piezo, borderColor:"green", fill:false}
-                ]},
-                options:{responsive:true, plugins:{title:{display:true,text:"Piezo Sensor"}}}
-            });
-
-            speedChart = new Chart(document.getElementById("speedChart"), {
-                type:'line',
-                data:{labels:data.timestamps,datasets:[
-                    {label:"Speed", data:data.speed, borderColor:"orange", fill:false}
-                ]},
-                options:{responsive:true, plugins:{title:{display:true,text:"Vehicle Speed"}}}
-            });
-        } else {
-            irChart.data.labels = data.timestamps;
-            irChart.data.datasets[0].data = data.ir1;
-            irChart.data.datasets[1].data = data.ir2;
-            irChart.update();
-
-            piezoChart.data.labels = data.timestamps;
-            piezoChart.data.datasets[0].data = data.piezo;
-            piezoChart.update();
-
-            speedChart.data.labels = data.timestamps;
-            speedChart.data.datasets[0].data = data.speed;
-            speedChart.update();
-        }
+// Light Control
+document.getElementById("lightSwitch").onchange = function() {
+    fetch('/api/control/relay/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relay: this.checked })
     });
+};
+
+// REAL-TIME UPDATE EVERY 400ms
+let history = [];
+function updateLive(d) {
+    document.getElementById("ir1").textContent = d.ir1;
+    document.getElementById("ir2").textContent = d.ir2;
+    document.getElementById("piezo").textContent = Number(d.piezo).toFixed(2);
+    document.getElementById("speed").textContent = d.speed.toFixed(1);
+    document.getElementById("relay").textContent = d.relay ? "ON" : "OFF";
+    document.getElementById("lightSwitch").checked = d.relay;
+
+    // Progress bars
+    gsap.to("#ir1-bar", {width: d.ir1*100+"%", duration:0.8});
+    gsap.to("#ir2-bar", {width: d.ir2*100+"%", duration:0.8});
+    gsap.to("#piezo-bar", {width: (d.piezo/5*100)+"%, duration:1.2});
+    gsap.to("#speed-bar", {width: (d.speed/200*100)+"%, duration:1.5});
+    gsap.to("#relay-bar", {width: d.relay?"100%":"0%", duration:1});
+
+    // Status
+    const s = document.getElementById("status");
+    if (d.speed > 15 || d.ir2 === 1) {
+        s.textContent = "ACTIVE"; s.className = "badge bg-danger glow";
+    } else {
+        s.textContent = "STANDBY"; s.className = "badge bg-warning";
+    }
 }
 
-// Fetch top panel every 2s
+// FASTEST UPDATE
 setInterval(() => {
     fetch('/api/latest/')
-    .then(res => res.json())
-    .then(updateTopPanel)
-    .catch(err=>console.error(err));
-}, 2000);
+        .then(r => r.json())
+        .then(updateLive)
+        .catch(() => {});
+}, 400);
 
-// Fetch historical data every 5s
-setInterval(updateRecentData, 5000);
-
-// Initial load
-updateRecentData();
-
+// Initialize
+updateLive({ir1:0,ir2:0,piezo:0,speed:0,relay:false});
 </script>
+
 </body>
 </html>

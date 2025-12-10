@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LIVE DATA PROOF</title>
+    <style>
+        body {background:#000;color:#0f0;font-family:Consolas;margin:0;padding:20px;}
+        table {width:100%;border-collapse:collapse;}
+        th,td {border:1px solid #0f0;padding:10px;text-align:center;}
+        th {background:#001100;}
+        .new {background:#003300 !important;animation:flash 1s;}
+        @keyframes flash {0%,100%{opacity:1}50%{opacity:0.5}}
+        h1 {color:#0ff;text-align:center;text-shadow:0 0 20px #0ff;}
+    </style>
+</head>
+<body>
+<h1>LIVE DATA IS FLOWING → SEE NEW ROWS!</h1>
+<table id="tbl">
+    <thead>
+        <tr>
+            <th>Time</th><th>IR1</th><th>IR2</th><th>Piezo</th><th>Relay</th><th>Speed</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+let lastCount = 0;
+function update() {
+    fetch('/api/recent/')
+    .then(r => r.json())
+    .then(d => {
+        if (!d.table_rows || d.table_rows.length === 0) {
+            document.body.innerHTML += "<p style='color:red'>NO DATA YET — CHECK ESP → DJANGO CONNECTION</p>";
+            return;
+        }
+        const tbody = document.querySelector('#tbl tbody');
+        tbody.innerHTML = '';
+        d.table_rows.slice(-30).reverse().forEach((row, i) => {
+            const tr = document.createElement('tr');
+            if (i === 0) tr.className = 'new';  // highlight newest
+            tr.innerHTML = `
+                <td>${new Date(row.timestamp).toLocaleTimeString()}</td>
+                <td>${row.ir1}</td>
+                <td style="font-size:1.5em;color:${row.ir2?'#f00':'#0f0'}"><b>${row.ir2}</b></td>
+                <td>${row.piezo}</td>
+                <td>${row.relay?'ON':'OFF'}</td>
+                <td>${row.speed.toFixed(1)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        if (d.table_rows.length > lastCount) {
+            console.log("NEW DATA RECEIVED!", d.table_rows.length);
+            lastCount = d.table_rows.length;
+        }
+    })
+    .catch(err => console.error("API ERROR:", err));
+}
+setInterval(update, 1000);
+update();
+</script>
+</body>
+</html>

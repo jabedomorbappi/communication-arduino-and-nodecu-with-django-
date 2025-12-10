@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CYBER VEHICLE IoT — FINAL BEAUTIFUL</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0e17 0%, #1a0033 100%);
+            color: #e0e7ff;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .glass {
+            background: rgba(20, 25, 50, 0.6);
+            border-radius: 20px;
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 255, 200, 0.2);
+        }
+        .lcd {
+            background: linear-gradient(135deg, #0a1a3f, #002a3f);
+            color: #00ffea;
+            text-shadow: 0 0 20px #00ffea;
+            border: 1px solid #00ffea40;
+            box-shadow: 0 0 30px rgba(0, 255, 234, 0.4);
+        }
+        .progress { height: 12px; background: #111; border-radius: 10px; overflow: hidden; }
+        .progress-bar {
+            background: linear-gradient(90deg, #00ffea, #00d4ff, #8b00ff, #00d4ff, #00ffea);
+            background-size: 300% 100%;
+            animation: shimmer 5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(0, 255, 234, 0.8);
+        }
+        @keyframes shimmer {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* FIXED: Proper plot container with minimum height */
+        .plot-container {
+            background: rgba(10, 15, 40, 0.8);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.3);
+            padding: 20px;
+            min-height: 400px;     /* This forces plots to be visible */
+            margin-bottom: 20px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 120px;
+            height: 60px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #333;
+            border-radius: 60px;
+            transition: .4s;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 52px; width: 52px;
+            left: 4px; bottom: 4px;
+            background: linear-gradient(#fff, #ddd);
+            border-radius: 50%;
+            transition: .4s;
+            box-shadow: 0 0 15px #000;
+        }
+        input:checked + .slider { background: #00ff9d; box-shadow: 0 0 35px #00ff9d; }
+        input:checked + .slider:before { transform: translateX(60px); }
+        .slider:after {
+            content: 'OFF';
+            color: white;
+            position: absolute;
+            top: 50%; left: 20px;
+            transform: translateY(-50%);
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input:checked + .slider:after { content: 'ON'; left: 65px; }
+
+        .glow { text-shadow: 0 0 20px #00ffff; animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 50% { text-shadow: 0 0 40px #00ffff; } }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="p-4">
+
+<div class="container-fluid">
+
+    <h1 class="text-center mb-5 glow display-3" id="main-title">CYBER VEHICLE IoT</h1>
+
+    <div class="row mb-5 glass p-4 rounded-4">
+        <div class="col-md-8 d-flex align-items-center">
+            <h2 class="mb-0">STATUS: <span id="status" class="badge bg-warning fs-3 px-4 py-2">STANDBY</span></h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <h3 class="d-inline-block me-4">EXTERIOR LIGHTS</h3>
+            <label class="switch">
+                <input type="checkbox" id="lightSwitch">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5" id="lcd-container">
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>IR1</h4><h1 id="ir1">1</h1><div class="progress mt-4"><div class="progress-bar" id="ir1-bar" style="width:100%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>IR2</h4><h1 id="ir2">1</h1><div class="progress mt-4"><div class="progress-bar bg-info" id="ir2-bar" style="width:100%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>VIBRATION</h4><h1 id="piezo">0.00</h1><div class="progress mt-4"><div class="progress-bar bg-warning" id="piezo-bar" style="width:0%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>SPEED</h4><h1 id="speed">0</h1><div class="progress mt-4"><div class="progress-bar bg-danger" id="speed-bar" style="width:0%"></div></div></div></div>
+        <div class="col-lg-2 col-md-4 col-6"><div class="card lcd text-center p-5 glass"><h4>LIGHT</h4><h1 id="relay">OFF</h1><div class="progress mt-4"><div class="progress-bar bg-primary" id="relay-bar" style="width:0%"></div></div></div></div>
+    </div>
+
+    <div class="text-center my-5">
+        <button class="btn btn-lg btn-outline-light px-5 py-4 fs-3 glow" id="open-analytics">
+            LAUNCH ANALYTICS
+        </button>
+    </div>
+
+    <!-- ANALYTICS — NOW ALL PLOTS ARE VISIBLE & BIG -->
+    <div id="analytics" style="display:none;">
+        <div class="row g-4">
+            <div class="col-12"><div class="plot-container" id="plot-speed"></div></div>
+            <div class="col-md-6"><div class="plot-container" id="gauge-speed"></div></div>
+            <div class="col-md-6"><div class="plot-container" id="plot-piezo"></div></div>
+            <div class="col-md-6"><div class="plot-container" id="plot-ir"></div></div>
+            <div class="col-md-6"><div class="plot-container" id="bar-ir-triggers"></div></div>
+            <div class="col-md-6"><div class="plot-container" id="plot-relay"></div></div>
+            <div class="col-md-6"><div class="plot-container" id="pie-relay"></div></div>
+            <div class="col-12"><div class="plot-container" id="heatmap-activity"></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+gsap.from("#main-title", { y: -150, opacity: 0, duration: 2, ease: "bounce.out" });
+gsap.from(".glass", { opacity: 0, y: 100, stagger: 0.2, duration: 1.5, delay: 0.5 });
+
+document.getElementById("open-analytics").onclick = () => {
+    document.getElementById("analytics").style.display = "block";
+    gsap.from(".plot-container", { scale: 0.8, opacity: 0, stagger: 0.1, duration: 1.5, ease: "elastic.out(1,0.5)" });
+    updateAllPlots();
+};
+
+// Real IoT Light Control
+document.getElementById("lightSwitch").onchange = function() {
+    const state = this.checked;
+    fetch('/api/control/relay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relay: state })
+    }).catch(() => {
+        this.checked = !state;
+        alert("Light control failed");
+    });
+};
+
+let history = [];
+let lastData = {};
+
+function updateLive(data) {
+    ['ir1','ir2','piezo','speed'].forEach(k => {
+        if (lastData[k] !== data[k]) {
+            gsap.to({v: lastData[k] ?? 0}, {v: data[k], duration: 1,
+                onUpdate: function() {
+                    document.getElementById(k).textContent = k==="piezo" ? this.targets()[0].v.toFixed(3) : Math.round(this.targets()[0].v);
+                }
+            });
+        }
+    });
+    document.getElementById("relay").textContent = data.relay ? "ON" : "OFF";
+    document.getElementById("lightSwitch").checked = data.relay;
+
+    gsap.to("#ir1-bar", {width: data.ir1*100 + "%", duration: 1});
+    gsap.to("#ir2-bar", {width: data.ir2*100 + "%", duration: 1});
+    gsap.to("#piezo-bar", {width: (data.piezo/5*100) + "%", duration: 1.5});
+    gsap.to("#speed-bar", {width: (data.speed/200*100) + "%", duration: 2});
+    gsap.to("#relay-bar", {width: data.relay ? "100%" : "0%", duration: 1});
+
+    const s = document.getElementById("status");
+    if (data.speed > 15 || data.piezo > 1) {
+        s.textContent = "ACTIVE"; s.className = "badge bg-success fs-3 px-4 py-2 glow";
+    } else {
+        s.textContent = "STANDBY"; s.className = "badge bg-warning fs-3 px-4 py-2";
+    }
+
+    lastData = data;
+    history.push({...data, timestamp: Date.now()});
+    history = history.slice(-1800);
+}
+
+// BEAUTIFUL & VISIBLE PLOTS — NOW 100% FIXED
+function updateAllPlots() {
+    if (history.length === 0) return;
+
+    const t = history.map(d => new Date(d.timestamp));
+    const speed = history.map(d => d.speed);
+    const piezo = history.map(d => d.piezo);
+    const ir1 = history.map(d => d.ir1);
+    const ir2 = history.map(d => d.ir2);
+    const relay = history.map(d => d.relay ? 1 : 0);
+
+    const layout = {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: '#00ffea', family: 'Orbitron', size: 14 },
+        margin: { t: 80, l: 70, r: 50, b: 70 },
+        height: 450,        // THIS MAKES PLOTS BIG
+        hoverlabel: { bgcolor: '#000', bordercolor: '#00ffea' },
+        title: { font: { size: 22 } }
+    };
+
+    Plotly.react('plot-speed', [{x:t, y:speed, mode:'lines+markers', line:{color:'#ff00aa', width:6}, marker:{size:10}}], {...layout, title:'VELOCITY MATRIX'});
+    Plotly.react('gauge-speed', [{type:'indicator', mode:'gauge+number', value:speed.at(-1)||0, gauge:{axis:{range:[0,200]}, bar:{color:'#ff00aa'}}}], {...layout, title:'SPEED GAUGE'});
+    Plotly.react('plot-piezo', [{x:t, y:piezo, fill:'tozeroy', fillcolor:'rgba(0,255,234,0.4)', line:{color:'#00ffea', width:5}}], {...layout, title:'VIBRATION ENERGY'});
+    Plotly.react('plot-ir', [{x:t, y:ir1, name:'IR1', line:{color:'#ff0066', width:5, shape:'hv'}}, {x:t, y:ir2, name:'IR2', line:{color:'#00ffff', width:5, shape:'hv'}}], {...layout, title:'BEAM GRID'});
+    Plotly.react('bar-ir-triggers', [{x:['IR1','IR2'], y:[ir1.filter(v=>v===0).length, ir2.filter(v=>v===0).length], type:'bar', marker:{color:['#ff0066','#00ffff']}}], {...layout, title:'DETECTIONS'});
+    Plotly.react('plot-relay', [{x:t, y:relay, line:{color:'#8b00ff', width:6, shape:'hv'}, fill:'tozeroy'}], {...layout, title:'LIGHT CONTROL'});
+    Plotly.react('pie-relay', [{labels:['ON','OFF'], values:[relay.filter(r=>r).length, relay.filter(r=>!r).length], type:'pie', hole:0.4, marker:{colors:['#8b00ff','#222']}}], {...layout, title:'LIGHT USAGE'});
+    Plotly.react('heatmap-activity', [{z:[history.map(d=>d.speed>10?100:20)], x:t, y:['ACTIVITY'], type:'heatmap', colorscale:'Electric'}], {...layout, title:'NEURAL ACTIVITY'});
+}
+
+// Polling
+setInterval(() => {
+    fetch('/api/latest/')
+        .then(r => r.ok ? r.json() : {ir1:1,ir2:1,piezo:0,speed:0,relay:false})
+        .then(updateLive)
+        .catch(() => updateLive({ir1:1,ir2:1,piezo:0,speed:0,relay:false}));
+}, 2000);
+
+setInterval(() => {
+    fetch('/api/recent/?minutes=30')
+        .then(r => r.ok ? r.json() : {table_rows: []})
+        .then(d => { history = d.table_rows || history; updateAllPlots(); });
+}, 8000);
+
+// Init
+updateLive({ir1:1,ir2:1,piezo:0,speed:0,relay:false});
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Members - PCIU EEE-29 IoT Project</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --cyan:#00d4ff; --purple:#7c3aed; --bg:#0a0e17; --card:#111827; --text:#e2e8f0; --muted:#94a3b8; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; overflow-x:hidden; }
+
+        .topbar {
+            position:fixed; top:0; left:0; width:100%; height:80px;
+            background:rgba(10,14,23,0.95); backdrop-filter:blur(12px);
+            border-bottom:1px solid #1e293b; z-index:1000;
+            display:flex; align-items:center; justify-content:space-between; padding:0 5%;
+        }
+        .logo { font-size:2.5rem; font-weight:800; background:linear-gradient(90deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+        .dashboard-btn {
+            position:fixed; bottom:40px; left:5%; z-index:999;
+            background:var(--cyan); color:#000; padding:16px 40px; border:none;
+            border-radius:50px; font-size:1.6rem; font-weight:600; cursor:pointer;
+            box-shadow:0 10px 30px rgba(0,212,255,0.4); transition:0.4s;
+        }
+        .dashboard-btn:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,212,255,0.6); }
+
+        .hero {
+            height:100vh; display:flex; flex-direction:column; justify-content:center;
+            align-items:center; text-align:center; padding:0 10%;
+        }
+        .hero h1 {
+            font-size:7rem; font-weight:800; letter-spacing:-3px;
+            background:linear-gradient(135deg,var(--cyan),var(--purple),#22d3ee);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            margin-bottom:20px;
+        }
+        .hero p { font-size:2.2rem; color:var(--muted); }
+
+        .team-section { padding:180px 8% 200px; }
+        .section-title {
+            text-align:center; font-size:5rem; font-weight:700; margin-bottom:120px;
+            color:var(--text); background:linear-gradient(90deg,#e2e8f0,#94a3b8);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+
+        .team-grid {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+            gap:80px; max-width:1600px; margin:0 auto;
+        }
+
+        .member-card {
+            background:var(--card); border-radius:24px; padding:60px 40px;
+            text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.4);
+            border:1px solid #1e293b; opacity:0;
+            transform:translateY(80px);
+            transition:all 0.8s ease-out;
+        }
+
+        .photo {
+            width:240px; height:240px; border-radius:50%; object-fit:cover;
+            margin-bottom:30px; border:6px solid var(--cyan);
+            box-shadow:0 15px 40px rgba(0,212,255,0.3);
+        }
+
+        .name { font-size:2.8rem; font-weight:700; color:#e2e8f0; margin:15px 0; }
+        .roll { font-size:1.9rem; color:var(--cyan); font-weight:600; margin:10px 0 20px; }
+        .role-title { font-size:1.6rem; color:var(--purple); font-weight:600; margin:25px 0 15px; }
+        .description { font-size:1.35rem; color:var(--muted); line-height:1.8; max-width:500px; margin:0 auto; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="logo">PCIU EEE-29</div>
+</div>
+
+<a href="/dashboard_cyber/">
+    <button class="dashboard-btn">DASHBOARD</button>
+</a>
+
+<div class="hero">
+    <h1>Our Team</h1>
+    <p>Department of Electrical & Electronics Engineering<br>Port City International University</p>
+</div>
+
+<div class="team-section">
+    <h2 class="section-title">Project Team Members</h2>
+
+    <div class="team-grid">
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/00d4ff/000000?text=JH" alt="Jabed" class="photo">
+            <div class="name">Md. Jabed Hossain</div>
+            <div class="roll">Roll: 2000123</div>
+            <div class="role-title">Hardware & Embedded Systems Lead</div>
+            <div class="description">Designed sensor interfacing circuits • Arduino programming • Speed calculation algorithm • Piezoelectric energy harvesting integration</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/7c3aed/000000?text=II" alt="Ikra" class="photo">
+            <div class="name">Ikra Binte Islam</div>
+            <div class="roll">Roll: 2000124</div>
+            <div class="role-title">Full-Stack Developer & UI Lead</div>
+            <div class="description">Developed real-time web dashboard • Django backend architecture • Real-time data visualization • Modern responsive design</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/22d3ee/000000?text=RU" alt="Rahim" class="photo">
+            <div class="name">Rahim Uddin</div>
+            <div class="roll">Roll: 2000125</div>
+            <div class="role-title">Wireless Communication Specialist</div>
+            <div class="description">ESP8266/NodeMCU programming • Serial-to-WiFi gateway • mDNS implementation • Low-latency data transmission</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/10b981/000000?text=FA" alt="Fatima" class="photo">
+            <div class="name">Fatima Akter</div>
+            <div class="roll">Roll: 2000126</div>
+            <div class="role-title">Sensors & Signal Processing</div>
+            <div class="description">IR sensor calibration • Dual-path sensing for latency measurement • Signal filtering • Accuracy optimization</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/f59e0b/000000?text=KR" alt="Karim" class="photo">
+            <div class="name">Karim Rahman</div>
+            <div class="roll">Roll: 2000127</div>
+            <div class="role-title">Real-Time Systems Engineer</div>
+            <div class="description">Optimized data flow architecture • Reduced latency from 800ms to under 100ms • Implemented timing synchronization</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/8b5cf6/000000?text=AS" alt="Ayesha" class="photo">
+            <div class="name">Ayesha Siddika</div>
+            <div class="roll">Roll: 2000128</div>
+            <div class="role-title">UI/UX Designer</div>
+            <div class="description">Modern interface design • User experience optimization • Visual hierarchy • Professional presentation aesthetics</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/3b82f6/000000?text=SA" alt="Sahil" class="photo">
+            <div class="name">Sahil Ahmed</div>
+            <div class="roll">Roll: 2000129</div>
+            <div class="role-title">Database & Backend Systems</div>
+            <div class="description">Django model design • API development • Data integrity • Query optimization and performance</div>
+        </div>
+
+        <div class="member-card">
+            <img src="https://via.placeholder.com/240/f43f5e/000000?text=NJ" alt="Nusrat" class="photo">
+            <div class="name">Nusrat Jahan</div>
+            <div class="roll">Roll: 2000130</div>
+            <div class="role-title">Documentation & Quality Assurance</div>
+            <div class="description">Technical documentation • System testing • Report writing • Project coordination and presentation</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero entrance
+gsap.from(".hero h1", { y: -100, opacity: 0, duration: 1.8, ease: "power3.out" });
+gsap.from(".hero p", { y: 80, opacity: 0, duration: 1.5, delay: 0.8 });
+
+// Section title
+gsap.from(".section-title", {
+    scrollTrigger: { trigger: ".section-title", start: "top 80%" },
+    y: 100, opacity: 0, duration: 1.5, ease: "power3.out"
+});
+
+// Member cards - PERFECT SCROLL ANIMATION (works both up & down)
+gsap.utils.toArray(".member-card").forEach((card, i) => {
+    ScrollTrigger.create({
+        trigger: card,
+        start: "top 85%",
+        end: "bottom 15%",
+        toggleActions: "play reverse play reverse",  // Works both directions
+        onEnter: () => gsap.to(card, { 
+            y: 0, 
+            opacity: 1, 
+            duration: 1.2, 
+            delay: i * 0.15,
+            ease: "power3.out"
+        }),
+        onLeave: () => gsap.to(card, { y: 80, opacity: 0, duration: 0.8 }),
+        onEnterBack: () => gsap.to(card, { 
+            y: 0, 
+            opacity: 1, 
+            duration: 1.2, 
+            delay: i * 0.15,
+            ease: "power3.out"
+        }),
+        onLeaveBack: () => gsap.to(card, { y: 80, opacity: 0, duration: 0.8 })
+    });
+});
+</script>
+
+</body>
+</html>
