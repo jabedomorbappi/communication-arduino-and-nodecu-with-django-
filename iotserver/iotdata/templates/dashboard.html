@@ -1,37 +1,143 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Vehicle IoT Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT EV Dashboard</title>
 
-  <meta http-equiv="refresh" content="5">
+    <!-- FONTS & ICONS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-  <style>
-    body{font-family:Arial;}
-    table{width:90%;border-collapse:collapse;margin:auto;}
-    th,td{padding:10px;border:1px solid #ddd;text-align:center;}
-    th{background:#007bff;color:white;}
-  </style>
+    <!-- DASHBOARD CSS -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
-<body>
-<h1 style="text-align:center;">Vehicle IoT Dashboard</h1>
-<div style="height:400px; overflow-y:auto;">
-<table>
-<tr>
-<th>Device</th><th>IR1</th><th>IR2</th><th>Piezo</th><th>Relay</th><th>Speed</th><th>Timestamp</th>
-</tr>
-{% for d in data %}
-<tr>
-<td>{{ d.device }}</td>
-<td>{{ d.ir1 }}</td>
-<td>{{ d.ir2 }}</td>
-<td>{{ d.piezo }}</td>
-<td>{{ d.relay }}</td>
-<td>{{ d.speed }}</td>
-<td>{{ d.timestamp }}</td>
-</tr>
-{% endfor %}
-</table>
+<body data-theme="dark">
+
+<!-- LEFT SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="{% static 'images/university_logo.png' %}" alt="University Logo">
+        <span>PCIU IoT</span>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="{% url 'home' %}" class="active"><i class="fas fa-gauge"></i> Dashboard</a></li>
+        <li><a href="{% url 'analytics_full' %}"><i class="fas fa-chart-line"></i> Analytics</a></li>
+        <li><a href="{% url 'team_view' %}"><i class="fas fa-users"></i> Team</a></li>
+    </ul>
+    <div class="theme-switcher">
+        <i class="fas fa-sun" id="themeToggle"></i>
+    </div>
 </div>
 
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+    <!-- HEADER -->
+    <header class="dashboard-header">
+        <h1 class="project-title">
+            Django IoT Framework for Piezoelectric Energy Harvesting <br>
+            and Speed Monitoring in Bluetooth EV
+        </h1>
+        <div class="university-info">
+            <span class="university-name">PORT CITY INTERNATIONAL UNIVERSITY</span><br>
+            <span class="supervisor-name">Supervisor: Prof. Akib Jayed Islam</span>
+        </div>
+    </header>
+
+    <!-- CONNECTION STATUS -->
+    <div class="connection-glass">
+        <span>Connection: </span><span id="connection-status" class="status-disconnected">WAITING...</span>
+        <span id="nodemcu-ip-display" class="ip-display">NodeMCU IP: Searching...</span>
+    </div>
+
+    <!-- SENSOR & CONTROLS GRID -->
+    <div class="dashboard-grid">
+
+        <!-- Vehicle Speed -->
+        <div class="card sensor-card">
+            <div class="card-title"><i class="fas fa-tachometer-alt"></i> Vehicle Speed</div>
+            <div id="speed-gauge" class="gauge"></div>
+            <div class="gauge-value"><span id="speed">0.0</span> km/h</div>
+        </div>
+
+        <!-- Piezo Voltage -->
+        <div class="card sensor-card">
+            <div class="card-title"><i class="fas fa-bolt"></i> Piezo Value</div>
+            <div id="piezo-gauge" class="gauge"></div>
+            <div class="gauge-value"><span id="piezo-value">0.0</span> </div>
+        </div>
+
+        <!-- Latency -->
+        <div class="card sensor-card">
+            <div class="card-title"><i class="fas fa-clock"></i> Latency Difference</div>
+            <div id="latency_diff" class="latency-value">—</div>
+        </div>
+
+        <!-- IR Sensors -->
+        <div class="card sensor-card">
+            <div class="card-title"><i class="fas fa-satellite-dish"></i> IR Sensors</div>
+            <div class="ir-grid">
+                <div class="ir-item">
+                    <span>Arduino IR1:</span> <span id="arduino_ir1">—</span>
+                </div>
+                <div class="ir-item">
+                    <span>Arduino IR2:</span> <span id="arduino_ir2">—</span>
+                </div>
+                <div class="ir-item">
+                    <span>NodeMCU IR1:</span> <span id="nodemcu_ir1">—</span>
+                </div>
+                <div class="ir-item">
+                    <span>NodeMCU IR2:</span> <span id="nodemcu_ir2">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Light Controls -->
+        <div class="card control-card">
+            <div class="card-title"><i class="fas fa-lightbulb"></i> Light Controls</div>
+            <div class="mode-selector">
+                <label>Mode:</label>
+                <label class="mode-toggle">
+                    <input type="checkbox" id="controlModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <!-- Common Control -->
+            <div id="common-controls" class="lights-grid">
+                <label>Common Light</label>
+                <label class="switch">
+                    <input type="checkbox" id="commonSwitch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Individual Controls -->
+            <div id="individual-controls" class="lights-grid" style="display:none;">
+                <div class="light-item">
+                    <span>Arduino Relay</span>
+                    <label class="switch">
+                        <input type="checkbox" id="arduinoSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="light-item">
+                    <span>NodeMCU Relay</span>
+                    <label class="switch">
+                        <input type="checkbox" id="nodemcuSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- DASHBOARD JS -->
+<script src="{% static 'js/dashboard.js' %}"></script>
 </body>
 </html>

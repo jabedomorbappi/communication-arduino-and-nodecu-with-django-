@@ -1,199 +1,290 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Members - PCIU EEE-29 IoT Project</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root { --cyan:#00d4ff; --purple:#7c3aed; --bg:#0a0e17; --card:#111827; --text:#e2e8f0; --muted:#94a3b8; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; overflow-x:hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT EV Project Team</title>
 
-        .topbar {
-            position:fixed; top:0; left:0; width:100%; height:80px;
-            background:rgba(10,14,23,0.95); backdrop-filter:blur(12px);
-            border-bottom:1px solid #1e293b; z-index:1000;
-            display:flex; align-items:center; justify-content:space-between; padding:0 5%;
-        }
-        .logo { font-size:2.5rem; font-weight:800; background:linear-gradient(90deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+<!-- FONTS & ICONS -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-        .dashboard-btn {
-            position:fixed; bottom:40px; left:5%; z-index:999;
-            background:var(--cyan); color:#000; padding:16px 40px; border:none;
-            border-radius:50px; font-size:1.6rem; font-weight:600; cursor:pointer;
-            box-shadow:0 10px 30px rgba(0,212,255,0.4); transition:0.4s;
-        }
-        .dashboard-btn:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,212,255,0.6); }
+<style>
+:root {
+    --cyan: #00ffff;
+    --green: #00ff9d;
+    --red: #ff0066;
+    --bg-dark: #000814;
+    --bg-light: #f0f0f0;
+    --card-bg: rgba(0, 20, 60, 0.85);
+    --card-shadow: rgba(0, 255, 255, 0.6);
+}
 
-        .hero {
-            height:100vh; display:flex; flex-direction:column; justify-content:center;
-            align-items:center; text-align:center; padding:0 10%;
-        }
-        .hero h1 {
-            font-size:7rem; font-weight:800; letter-spacing:-3px;
-            background:linear-gradient(135deg,var(--cyan),var(--purple),#22d3ee);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-            margin-bottom:20px;
-        }
-        .hero p { font-size:2.2rem; color:var(--muted); }
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-dark);
+    color: var(--cyan);
+}
 
-        .team-section { padding:180px 8% 200px; }
-        .section-title {
-            text-align:center; font-size:5rem; font-weight:700; margin-bottom:120px;
-            color:var(--text); background:linear-gradient(90deg,#e2e8f0,#94a3b8);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-        }
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background: #001122;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.sidebar-logo img {
+    width: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--cyan);
+}
+.sidebar-logo span {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+}
+.sidebar-menu li a {
+    display: block;
+    color: var(--cyan);
+    text-decoration: none;
+    font-size: 1.2rem;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+.sidebar-menu li a.active, .sidebar-menu li a:hover {
+    background: var(--cyan);
+    color: #000;
+}
 
-        .team-grid {
-            display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-            gap:80px; max-width:1600px; margin:0 auto;
-        }
+/* Theme switcher */
+.theme-switcher {
+    text-align: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
 
-        .member-card {
-            background:var(--card); border-radius:24px; padding:60px 40px;
-            text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.4);
-            border:1px solid #1e293b; opacity:0;
-            transform:translateY(80px);
-            transition:all 0.8s ease-out;
-        }
+/* Main content */
+.main-content {
+    margin-left: 270px;
+    padding: 40px;
+}
 
-        .photo {
-            width:240px; height:240px; border-radius:50%; object-fit:cover;
-            margin-bottom:30px; border:6px solid var(--cyan);
-            box-shadow:0 15px 40px rgba(0,212,255,0.3);
-        }
+/* Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.project-title {
+    font-size: 2rem;
+    line-height: 1.3;
+    margin-bottom: 10px;
+}
+.university-info {
+    font-size: 1.2rem;
+    color: var(--green);
+}
 
-        .name { font-size:2.8rem; font-weight:700; color:#e2e8f0; margin:15px 0; }
-        .roll { font-size:1.9rem; color:var(--cyan); font-weight:600; margin:10px 0 20px; }
-        .role-title { font-size:1.6rem; color:var(--purple); font-weight:600; margin:25px 0 15px; }
-        .description { font-size:1.35rem; color:var(--muted); line-height:1.8; max-width:500px; margin:0 auto; }
-    </style>
+/* Team grid: single row per member */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Team card */
+.card {
+    background: var(--card-bg);
+    border: 2px solid var(--cyan);
+    border-radius: 20px;
+    padding: 20px 30px;
+    text-align: left;
+    box-shadow: 0 0 40px var(--card-shadow);
+    display: flex;
+    align-items: flex-start;
+    transition: 0.3s;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 60px rgba(0, 255, 255, 0.9);
+}
+.card img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--cyan);
+    margin-right: 25px;
+    object-fit: cover;
+}
+.card-content {
+    flex: 1;
+}
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+.member-roll {
+    font-size: 1rem;
+    color: var(--green);
+    margin-bottom: 10px;
+}
+.member-role ul {
+    font-size: 1rem;
+    color: #fff;
+    line-height: 1.5;
+    padding-left: 20px;
+}
+.member-role li {
+    margin-bottom: 5px;
+}
+</style>
 </head>
-<body>
+<body data-theme="dark">
 
-<div class="topbar">
-    <div class="logo">PCIU EEE-29</div>
-</div>
-
-<a href="/dashboard_cyber/">
-    <button class="dashboard-btn">DASHBOARD</button>
-</a>
-
-<div class="hero">
-    <h1>Our Team</h1>
-    <p>Department of Electrical & Electronics Engineering<br>Port City International University</p>
-</div>
-
-<div class="team-section">
-    <h2 class="section-title">Project Team Members</h2>
-
-    <div class="team-grid">
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/00d4ff/000000?text=JH" alt="Jabed" class="photo">
-            <div class="name">Md. Jabed Hossain</div>
-            <div class="roll">Roll: 2000123</div>
-            <div class="role-title">Hardware & Embedded Systems Lead</div>
-            <div class="description">Designed sensor interfacing circuits • Arduino programming • Speed calculation algorithm • Piezoelectric energy harvesting integration</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/7c3aed/000000?text=II" alt="Ikra" class="photo">
-            <div class="name">Ikra Binte Islam</div>
-            <div class="roll">Roll: 2000124</div>
-            <div class="role-title">Full-Stack Developer & UI Lead</div>
-            <div class="description">Developed real-time web dashboard • Django backend architecture • Real-time data visualization • Modern responsive design</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/22d3ee/000000?text=RU" alt="Rahim" class="photo">
-            <div class="name">Rahim Uddin</div>
-            <div class="roll">Roll: 2000125</div>
-            <div class="role-title">Wireless Communication Specialist</div>
-            <div class="description">ESP8266/NodeMCU programming • Serial-to-WiFi gateway • mDNS implementation • Low-latency data transmission</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/10b981/000000?text=FA" alt="Fatima" class="photo">
-            <div class="name">Fatima Akter</div>
-            <div class="roll">Roll: 2000126</div>
-            <div class="role-title">Sensors & Signal Processing</div>
-            <div class="description">IR sensor calibration • Dual-path sensing for latency measurement • Signal filtering • Accuracy optimization</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/f59e0b/000000?text=KR" alt="Karim" class="photo">
-            <div class="name">Karim Rahman</div>
-            <div class="roll">Roll: 2000127</div>
-            <div class="role-title">Real-Time Systems Engineer</div>
-            <div class="description">Optimized data flow architecture • Reduced latency from 800ms to under 100ms • Implemented timing synchronization</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/8b5cf6/000000?text=AS" alt="Ayesha" class="photo">
-            <div class="name">Ayesha Siddika</div>
-            <div class="roll">Roll: 2000128</div>
-            <div class="role-title">UI/UX Designer</div>
-            <div class="description">Modern interface design • User experience optimization • Visual hierarchy • Professional presentation aesthetics</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/3b82f6/000000?text=SA" alt="Sahil" class="photo">
-            <div class="name">Sahil Ahmed</div>
-            <div class="roll">Roll: 2000129</div>
-            <div class="role-title">Database & Backend Systems</div>
-            <div class="description">Django model design • API development • Data integrity • Query optimization and performance</div>
-        </div>
-
-        <div class="member-card">
-            <img src="https://via.placeholder.com/240/f43f5e/000000?text=NJ" alt="Nusrat" class="photo">
-            <div class="name">Nusrat Jahan</div>
-            <div class="roll">Roll: 2000130</div>
-            <div class="role-title">Documentation & Quality Assurance</div>
-            <div class="description">Technical documentation • System testing • Report writing • Project coordination and presentation</div>
-        </div>
+<!-- LEFT SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="{% static 'images/university_logo.png' %}" alt="University Logo">
+        <span>PCIU IoT</span>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="{% url 'home' %}"><i class="fas fa-gauge"></i> Dashboard</a></li>
+        <li><a href="{% url 'analytics_full' %}"><i class="fas fa-chart-line"></i> Analytics</a></li>
+        <li><a href="{% url 'team_view' %}" class="active"><i class="fas fa-users"></i> Team</a></li>
+        <li><a href="{% url 'cyber' %}" class="active"><i class="fas fa-users"></i> anoter</a></li>
+    </ul>
+    <div class="theme-switcher">
+        <i class="fas fa-sun" id="themeToggle"></i>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <header class="dashboard-header">
+        <h1 class="project-title">IoT EV Project Team</h1>
+        <div class="university-info">PORT CITY INTERNATIONAL UNIVERSITY</div>
+    </header>
+
+    <div class="dashboard-grid" id="teamGrid">
+        <!-- JS will populate team members here -->
+    </div>
+</div>
+
 <script>
-gsap.registerPlugin(ScrollTrigger);
+// ===== TEAM DATA =====
+const teamMembers = [
+    {
+        name: "Mehedi Hasan",
+        roll: "02907266",
+        role: [
+            "Designed hardware circuits for IR sensor modules and relays.",
+            "Integrated Arduino with IR sensors and relays for vehicle automation.",
+            "Tested sensor connectivity and relay switching logic.",
+            "Assisted in data collection from sensors for further analysis."
+        ]
+    },
+    {
+        name: "EEE 02907254",
+        roll: "02907254",
+        role: [
+            "Calibrated piezoelectric vibration sensors.",
+            "Processed raw piezo sensor data for speed computation.",
+            "Developed algorithm for converting voltage signals to speed readings.",
+            "Ensured accurate real-time monitoring of piezo values."
+        ]
+    },
+    {
+        name: "SIPON SHARMA",
+        roll: "02907287",
+        role: [
+            "Implemented NodeMCU Bluetooth connectivity for remote control.",
+            "Integrated IoT protocols for real-time data monitoring.",
+            "Developed communication between dashboard and vehicle modules.",
+            "Tested wireless control functionality under different scenarios."
+        ]
+    },
+    {
+        name: "Amirul Islam",
+        roll: "EEE-02907272",
+        role: [
+            "Designed frontend dashboard with professional UI/UX.",
+            "Created responsive layouts for sensors and control visualization.",
+            "Implemented analog-style gauges for speed and piezo values.",
+            "Ensured intuitive navigation and theme switching functionality."
+        ]
+    },
+    {
+        name: "Suvashis Bhowmik",
+        roll: "EEE 02907255",
+        role: [
+            "Developed backend Django APIs for real-time data communication.",
+            "Managed database for storing sensor readings and logs.",
+            "Optimized server response for multiple clients simultaneously.",
+            "Handled authentication and security for IoT dashboard access."
+        ]
+    },
+    {
+        name: "Srabosty Bhowmick",
+        roll: "EEE 02907258",
+        role: [
+            "Visualized data from speed and piezo sensors with graphs.",
+            "Implemented analytics for latency and sensor performance.",
+            "Generated reports for project evaluation and monitoring.",
+            "Assisted team members in integrating data visualization tools."
+        ]
+    },
+    {
+        name: "Tunzir Alam Sefat",
+        roll: "EEE 02907299",
+        role: [
+            "Tested relay logic and system integration.",
+            "Ensured accurate response of vehicle controls.",
+            "Identified and fixed hardware-software interaction issues.",
+            "Performed validation of complete IoT EV system before deployment."
+        ]
+    },
+    {
+        name: "Prangon Deb Nath",
+        roll: "EEE 02907294",
+        role: [
+            "Coordinated team activities and tracked progress.",
+            "Prepared technical documentation and reports.",
+            "Compiled research findings and project notes.",
+            "Ensured project milestones were completed on time."
+        ]
+    }
+];
 
-// Hero entrance
-gsap.from(".hero h1", { y: -100, opacity: 0, duration: 1.8, ease: "power3.out" });
-gsap.from(".hero p", { y: 80, opacity: 0, duration: 1.5, delay: 0.8 });
-
-// Section title
-gsap.from(".section-title", {
-    scrollTrigger: { trigger: ".section-title", start: "top 80%" },
-    y: 100, opacity: 0, duration: 1.5, ease: "power3.out"
-});
-
-// Member cards - PERFECT SCROLL ANIMATION (works both up & down)
-gsap.utils.toArray(".member-card").forEach((card, i) => {
-    ScrollTrigger.create({
-        trigger: card,
-        start: "top 85%",
-        end: "bottom 15%",
-        toggleActions: "play reverse play reverse",  // Works both directions
-        onEnter: () => gsap.to(card, { 
-            y: 0, 
-            opacity: 1, 
-            duration: 1.2, 
-            delay: i * 0.15,
-            ease: "power3.out"
-        }),
-        onLeave: () => gsap.to(card, { y: 80, opacity: 0, duration: 0.8 }),
-        onEnterBack: () => gsap.to(card, { 
-            y: 0, 
-            opacity: 1, 
-            duration: 1.2, 
-            delay: i * 0.15,
-            ease: "power3.out"
-        }),
-        onLeaveBack: () => gsap.to(card, { y: 80, opacity: 0, duration: 0.8 })
-    });
+// ===== POPULATE TEAM GRID =====
+const teamGrid = document.getElementById("teamGrid");
+teamMembers.forEach(member => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.innerHTML = `
+        <img src="https://via.placeholder.com/120/333333/ffffff?text=IMG" alt="Profile">
+        <div class="card-content">
+            <div class="card-title"><i class="fas fa-user"></i> ${member.name}</div>
+            <div class="member-roll">Roll: ${member.roll}</div>
+            <div class="member-role"><ul>${member.role.map(item => `<li>${item}</li>`).join('')}</ul></div>
+        </div>
+    `;
+    teamGrid.appendChild(card);
 });
 </script>
 

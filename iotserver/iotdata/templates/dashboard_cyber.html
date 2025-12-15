@@ -1,52 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle IoT Control & Analytics Center</title>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --cyan:#00ffff; --green:#00ff9d; --red:#ff0066; --bg:#000814; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:var(--bg); color:var(--cyan); font-family:'Rajdhani',sans-serif; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle IoT Control & Analytics Center</title>
 
-        .menu { position:fixed; top:0; width:100%; height:90px; background:#001122; border-bottom:5px solid var(--cyan); box-shadow:0 0 60px var(--cyan); z-index:9999; display:flex; align-items:center; justify-content:space-between; padding:0 60px; }
-        .menu a { color:var(--cyan); text-decoration:none; font-size:2rem; padding:14px 45px; border:3px solid var(--cyan); border-radius:60px; transition:0.4s; }
-        .menu a:hover { background:var(--cyan); color:#000; }
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 
-        .content { margin-top:120px; padding:40px; text-align:center; }
-        .header { margin:60px 0; }
-        .logo { height:150px; border-radius:50%; border:6px solid var(--cyan); box-shadow:0 0 100px var(--cyan); }
-        .uni-name { font-family:'Orbitron'; font-size:4.5rem; text-shadow:0 0 70px var(--cyan); background:linear-gradient(90deg,#00ffff,#ff00ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-        .project-title { font-size:3rem; color:#0f0; text-shadow:0 0 40px #0f0; margin:30px 0; line-height:1.4; }
-        .supervisor { font-size:2rem; color:#0ff; text-shadow:0 0 25px #0ff; }
-
-        .glass { background:rgba(10,40,80,0.8); border:4px solid var(--cyan); border-radius:40px; padding:60px; max-width:1600px; margin:50px auto; box-shadow:0 0 120px rgba(0,255,255,0.8); backdrop-filter:blur(20px); }
-
-        .card { background:rgba(0,20,60,0.9); border:rgba(0,255,255,0.6); border-radius:30px; padding:40px; margin:20px; display:inline-block; min-width:320px; transition:0.5s; }
-        .card:hover { transform:translateY(-20px); }
-
-        .val { font-size:7rem; font-weight:900; text-shadow:0 0 60px var(--cyan); }
-        .label { font-size:2.2rem; letter-spacing:8px; margin-bottom:20px; }
-
-        .switch { width:180px; height:90px; position:relative; display:inline-block; }
-        .switch input { opacity:0; }
-        .slider { position:absolute; inset:0; background:#333; border-radius:90px; transition:.6s; }
-        .slider:before { position:absolute; content:""; height:82px; width:82px; left:4px; bottom:4px; background:white; border-radius:50%; transition:.6s; }
-        input:checked + .slider { background:#00ff00; box-shadow:0 0 80px #00ff00; }
-        input:checked + .slider:before { transform:translateX(90px); }
-
-        .light-img { width:120px; height:120px; border-radius:50%; margin-top:20px; border:5px solid; transition:0.5s; }
-
-        .status-connected { color:#00ff00; text-shadow:0 0 60px #00ff00; }
-        .status-disconnected { color:#ff0066; text-shadow:0 0 60px #ff0066; animation:pulse 2s infinite; }
-        @keyframes pulse { 50% { opacity:0.6; } }
-    </style>
+<style>
+:root { --cyan:#00ffff; --green:#00ff9d; --red:#ff0066; --bg:#000814; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--cyan); font-family:'Rajdhani',sans-serif; }
+.menu { position:fixed; top:0; width:100%; height:90px; background:#001122; border-bottom:5px solid var(--cyan); box-shadow:0 0 60px var(--cyan); z-index:9999; display:flex; align-items:center; justify-content:space-between; padding:0 60px; }
+.menu a { color:var(--cyan); text-decoration:none; font-size:2rem; padding:14px 45px; border:3px solid var(--cyan); border-radius:60px; transition:0.4s; }
+.menu a:hover { background:var(--cyan); color:#000; }
+.content { margin-top:120px; padding:40px; text-align:center; }
+.header { margin:60px 0; }
+.logo { height:150px; border-radius:50%; border:6px solid var(--cyan); box-shadow:0 0 100px var(--cyan); }
+.uni-name { font-family:'Orbitron'; font-size:4.5rem; text-shadow:0 0 70px var(--cyan); background:linear-gradient(90deg,#00ffff,#ff00ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.project-title { font-size:3rem; color:#0f0; text-shadow:0 0 40px #0f0; margin:30px 0; line-height:1.4; }
+.supervisor { font-size:2rem; color:#0ff; text-shadow:0 0 25px #0ff; }
+.glass { background:rgba(10,40,80,0.8); border:4px solid var(--cyan); border-radius:40px; padding:60px; max-width:1600px; margin:50px auto; box-shadow:0 0 120px rgba(0,255,255,0.8); backdrop-filter:blur(20px); }
+.card { background:rgba(0,20,60,0.9); border:rgba(0,255,255,0.6); border-radius:30px; padding:40px; margin:20px; display:inline-block; min-width:320px; transition:0.5s; }
+.card:hover { transform:translateY(-20px); }
+.val { font-size:7rem; font-weight:900; text-shadow:0 0 60px var(--cyan); }
+.label { font-size:2.2rem; letter-spacing:8px; margin-bottom:20px; }
+.mode-selector { margin: 40px auto; max-width: 600px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-family: 'Orbitron', sans-serif;}
+.mode-selector label { margin: 0 20px; }
+.mode-toggle { position: relative; width: 140px; height: 50px; background: #333; border-radius: 25px; cursor: pointer; border: 3px solid var(--cyan); }
+.mode-toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; border-radius: 25px; transition: .4s; }
+.toggle-slider:before {
+    position: absolute; content: "COMMON"; background: var(--cyan); color: #000;
+    height: 44px; width: 70px; left: 0px; bottom: 0px; border-radius: 25px; transition: .4s;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold;
+}
+.mode-toggle input:checked + .toggle-slider:before {
+    transform: translateX(65px); content: "INDIVIDUAL";
+}
+.switch { width:180px; height:90px; position:relative; display:inline-block; }
+.switch input { opacity:0; }
+.slider { position:absolute; inset:0; background:#333; border-radius:90px; transition:.6s; }
+.slider:before { position:absolute; content:""; height:82px; width:82px; left:4px; bottom:4px; background:white; border-radius:50%; transition:.6s; }
+/* REVERSED VISUAL: Unchecked = ON (green), Checked = OFF (red) */
+input:not(:checked) + .slider { background:#00ff00; box-shadow:0 0 80px #00ff00; }
+input:not(:checked) + .slider:before { transform:translateX(90px); }
+input:checked + .slider { background:#ff0066; box-shadow:0 0 80px #ff0066; }
+.light-img { width:120px; height:120px; border-radius:50%; margin-top:20px; border:5px solid; transition:0.5s; }
+.switch input:disabled + .slider, .mode-toggle input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
+.status-connected { color:#00ff00; text-shadow:0 0 60px #00ff00; }
+.status-disconnected { color:#ff0066; text-shadow:0 0 60px #ff0066; animation:pulse 2s infinite; }
+@keyframes pulse { 50% { opacity:0.6; } }
+</style>
 </head>
 <body>
-
 <div class="menu">
     <div style="font-family:Orbitron;font-size:3.5rem;color:var(--cyan);text-shadow:0 0 60px var(--cyan);">PCIU IoT</div>
     <div>
@@ -57,12 +65,11 @@
 
 <div class="content">
     <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/81/Port_City_International_University_Logo.png" 
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/81/Port_City_International_University_Logo.png"
              alt="PCIU Logo" class="logo">
         <h1 class="uni-name">PORT CITY INTERNATIONAL UNIVERSITY</h1>
         <h2 class="project-title">
-            A Django-Integrated IoT Framework for Piezoelectric Energy Harvesting<br>
-            and Speed Monitoring in Bluetooth-Controlled RC Vehicles
+            IoT Framework for Piezoelectric Energy & Speed Monitoring
         </h2>
         <p class="supervisor">
             Supervisor: <strong>Akib Jayed Islam</strong><br>
@@ -71,24 +78,39 @@
     </div>
 
     <div class="glass">
-        <h2 style="font-size:4rem;margin-bottom:40px;">
+        <h2 style="font-size:4rem;margin-bottom:20px;">
             CONNECTION: <span id="connection-status" class="status-disconnected">WAITING...</span>
         </h2>
+        <div id="nodemcu-ip-display" style="font-family:Orbitron; font-size:2.8rem; margin:30px 0; color:#ff0066;">
+            NodeMCU IP: Searching...
+        </div>
 
-        <h3 style="font-size:3.5rem;margin:40px 0;">COMMON LIGHT CONTROL</h3>
-        <label class="switch"><input type="checkbox" id="commonSwitch"><span class="slider"></span></label>
+        <div class="mode-selector">
+            <label for="controlModeToggle">CONTROL MODE:</label>
+            <label class="mode-toggle">
+                <input type="checkbox" id="controlModeToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
 
-        <h3 style="font-size:3.5rem;margin:60px 0 40px;">INDIVIDUAL LIGHTS</h3>
-        <div style="display:flex;justify-content:center;gap:100px;">
-            <div style="text-align:center;">
-                <p style="font-size:2rem;">ARDUINO RELAY</p>
-                <label class="switch"><input type="checkbox" id="arduinoSwitch"><span class="slider"></span></label>
-                <img id="arduino_light" class="light-img" src="https://via.placeholder.com/120/333333/ffffff?text=OFF" style="border-color:#00ffff;">
-            </div>
-            <div style="text-align:center;">
-                <p style="font-size:2rem;">NODEMCU RELAY</p>
-                <label class="switch"><input type="checkbox" id="nodemcuSwitch"><span class="slider"></span></label>
-                <img id="nodemcu_light" class="light-img" src="https://via.placeholder.com/120/333333/ffffff?text=OFF" style="border-color:#ff00ff;">
+        <div id="common-controls">
+            <h3 style="font-size:3.5rem;margin:60px 0 40px;">COMMON LIGHT CONTROL</h3>
+            <label class="switch"><input type="checkbox" id="commonSwitch"><span class="slider"></span></label>
+        </div>
+
+        <div id="individual-controls" style="display:none;">
+            <h3 style="font-size:3.5rem;margin:60px 0 40px;">INDIVIDUAL LIGHTS</h3>
+            <div style="display:flex;justify-content:center;gap:100px;">
+                <div style="text-align:center;">
+                    <p style="font-size:2rem;">ARDUINO RELAY</p>
+                    <label class="switch"><input type="checkbox" id="arduinoSwitch"><span class="slider"></span></label>
+                    <img id="arduino_light" class="light-img" src="https://via.placeholder.com/120/333333/ffffff?text=OFF" style="border-color:#00ffff;">
+                </div>
+                <div style="text-align:center;">
+                    <p style="font-size:2rem;">NODEMCU RELAY</p>
+                    <label class="switch"><input type="checkbox" id="nodemcuSwitch"><span class="slider"></span></label>
+                    <img id="nodemcu_light" class="light-img" src="https://via.placeholder.com/120/333333/ffffff?text=OFF" style="border-color:#ff00ff;">
+                </div>
             </div>
         </div>
 
@@ -97,91 +119,194 @@
             <div class="card"><div class="label">NODEMCU IR1</div><div class="val" id="nodemcu_ir1">—</div></div>
             <div class="card"><div class="label">ARDUINO IR2</div><div class="val" id="arduino_ir2">—</div></div>
             <div class="card"><div class="label">NODEMCU IR2</div><div class="val" id="nodemcu_ir2">—</div></div>
-            <div class="card"><div class="label">VIBRATION</div><div class="val" id="piezo">0.0</div></div>
-            <div class="card"><div class="label">PIEZO RELAY</div><div class="val" id="piezo_relay">OFF</div>
+            <div class="card"><div class="label">VIBRATION (V)</div><div class="val" id="piezo">0.0</div></div>
+            <div class="card"><div class="label">PIEZO RELAY</div>
+                <div class="val" id="piezo_relay">OFF</div>
                 <img id="piezo_light" class="light-img" src="https://via.placeholder.com/120/333333/ffffff?text=OFF" style="border-color:#ffd700;">
             </div>
             <div class="card"><div class="label">VELOCITY</div><div class="val" id="speed">0.0</div><div style="font-size:2.5rem;">km/h</div>
                 <div id="speed-gauge" style="height:350px;margin-top:30px auto;width:350px;"></div>
             </div>
-            <div class="card"><div class="label">LATENCY</div><div class="val" id="latency">0.0</div><div style="font-size:2rem;">ms</div></div>
+            <div class="card"><div class="label">LATENCY DIFFERENCE</div><div class="val" id="latency_diff">—</div><div style="font-size:2rem;">ms</div></div>
         </div>
     </div>
 </div>
 
 <script>
-let lastSeen = 0;
+const fetchInterval = 800;
 
-document.getElementById("commonSwitch").onchange = function() {
-    const state = this.checked;
-    fetch('/api/control/relay/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({state:state,type:"common"})});
-    document.getElementById("arduinoSwitch").checked = state;
-    document.getElementById("nodemcuSwitch").checked = state;
-};
+// Elements
+const modeToggle = document.getElementById("controlModeToggle");
+const commonControls = document.getElementById("common-controls");
+const individualControls = document.getElementById("individual-controls");
+const commonSwitch = document.getElementById("commonSwitch");
+const arduinoSwitch = document.getElementById("arduinoSwitch");
+const nodemcuSwitch = document.getElementById("nodemcuSwitch");
+const arduino_light = document.getElementById("arduino_light");
+const nodemcu_light = document.getElementById("nodemcu_light");
+const piezo_light = document.getElementById("piezo_light");
+const connectionStatusEl = document.getElementById("connection-status");
+const ipDisplayEl = document.getElementById("nodemcu-ip-display");
+const arduinoIr1El = document.getElementById("arduino_ir1");
+const arduinoIr2El = document.getElementById("arduino_ir2");
+const nodemcuIr1El = document.getElementById("nodemcu_ir1");
+const nodemcuIr2El = document.getElementById("nodemcu_ir2");
+const piezoEl = document.getElementById("piezo");
+const speedEl = document.getElementById("speed");
+const latencyDiffEl = document.getElementById("latency_diff");
+const speedGaugeEl = document.getElementById("speed-gauge");
 
-document.getElementById("arduinoSwitch").onchange = function() {
-    fetch('/api/control/relay/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({state:this.checked,type:"arduino"})});
-};
+// Track pending commands
+const commandPending = { common: false, arduino: false, nodemcu: false };
+let lastConnectedStatus = false;
 
-document.getElementById("nodemcuSwitch").onchange = function() {
-    fetch('/api/control/relay/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({state:this.checked,type:"nodemcu"})});
-};
+// Send relay command
+function sendRelayCommand(state, type, switchElement, lightElement=null) {
+    if(commandPending[type]) return;
+    commandPending[type] = true;
+    switchElement.disabled = true;
 
-setInterval(() => {
-    fetch('/api/latest/')
+    if(lightElement){
+        lightElement.src = state
+            ? "https://via.placeholder.com/120/00ff00/000000?text=ON"
+            : "https://via.placeholder.com/120/ff0066/000000?text=OFF";
+    }
+
+    fetch('/api/control/relay/', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ state: state, type: type })
+    })
     .then(r => r.json())
-    .then(d => {
-        lastSeen = Date.now();
-
-        // Update values
-        document.getElementById("arduino_ir1").textContent = d.arduino.ir1;
-        document.getElementById("arduino_ir2").textContent = d.arduino.ir2;
-        document.getElementById("nodemcu_ir1").textContent = d.nodemcu.ir1;
-        document.getElementById("nodemcu_ir2").textContent = d.nodemcu.ir2;
-        document.getElementById("piezo").textContent = d.arduino.piezo.toFixed(1);
-        document.getElementById("speed").textContent = d.arduino.speed.toFixed(1);
-
-        // Light images
-        document.getElementById("arduino_light").src = d.arduino.arduino_relay ? 
-            "https://via.placeholder.com/120/00ffff/000000?text=ON" : "https://via.placeholder.com/120/333333/ffffff?text=OFF";
-        document.getElementById("nodemcu_light").src = d.nodemcu.nodemcu_relay ? 
-            "https://via.placeholder.com/120/ff00ff/000000?text=ON" : "https://via.placeholder.com/120/333333/ffffff?text=OFF";
-        document.getElementById("piezo_light").src = d.arduino.piezo_relay ? 
-            "https://via.placeholder.com/120/ffd700/000000?text=ON" : "https://via.placeholder.com/120/333333/ffffff?text=OFF";
-
-        // Update switches
-        document.getElementById("arduinoSwitch").checked = d.arduino.arduino_relay;
-        document.getElementById("nodemcuSwitch").checked = d.nodemcu.nodemcu_relay;
-
-        // Connection status
-        const seconds = (Date.now() - lastSeen) / 1000;
-        const status = document.getElementById("connection-status");
-        if (seconds < 5) {
-            status.textContent = "ACTIVE - NODEMCU CONNECTED";
-            status.className = "status-connected";
-        } else {
-            status.textContent = `DISCONNECTED - ${Math.floor(seconds)}s ago`;
-            status.className = "status-disconnected";
+    .then(()=> {
+        commandPending[type]=false; 
+        switchElement.disabled=false; 
+    })
+    .catch(err=>{ 
+        console.error(err); 
+        alert('Command failed!'); 
+        commandPending[type]=false; 
+        switchElement.disabled=false; 
+        switchElement.checked = !state; 
+        if(lightElement){
+            lightElement.src = !state
+                ? "https://via.placeholder.com/120/00ff00/000000?text=ON"
+                : "https://via.placeholder.com/120/ff0066/000000?text=OFF";
         }
-
-        // Speed gauge
-        Plotly.react('speed-gauge', [{
-            type: 'indicator',
-            mode: 'gauge+number',
-            value: d.arduino.speed,
-            title: { text: "VELOCITY", font: { size: 32 } },
-            gauge: {
-                axis: { range: [0, 200] },
-                bar: { color: "#ff00ff" },
-                steps: [{ range: [0, 100], color: "#0066ff" }, { range: [100, 200], color: "#ff00ff" }],
-                threshold: { line: { color: "red", width: 6 }, value: 180 }
-            }
-        }], { height: 350, margin: { t: 60, b: 60, l: 60, r: 60 }, paper_bgcolor: "transparent", font: { color: "#00ffff" } });
     });
-}, 400);
+}
 
-gsap.from(".header", { y: -100, opacity: 0, duration: 2, ease: "bounce.out" });
-gsap.from(".glass", { opacity: 0, y: 200, duration: 2, delay: 0.5, ease: "power4.out" });
+// Handle mode change
+async function handleModeChange(){
+    const isIndividual = modeToggle.checked;
+    commonControls.style.display = isIndividual ? 'none':'block';
+    individualControls.style.display = isIndividual ? 'block':'none';
+
+    const data = await fetchLatestData();
+    if(data){
+        const a = data.arduino.arduino_relay;
+        const n = data.nodemcu.nodemcu_relay;
+
+        if(isIndividual){
+            arduinoSwitch.checked = a;
+            nodemcuSwitch.checked = n;
+        } else {
+            const bothOn = a && n;
+            commonSwitch.checked = bothOn;
+        }
+    }
+
+    [modeToggle,commonSwitch,arduinoSwitch,nodemcuSwitch].forEach(s=>s.disabled=false);
+}
+
+modeToggle.onchange = handleModeChange;
+commonSwitch.onchange = ()=>sendRelayCommand(commonSwitch.checked,"common",commonSwitch,piezo_light);
+arduinoSwitch.onchange = ()=>sendRelayCommand(arduinoSwitch.checked,"arduino",arduinoSwitch,arduino_light);
+nodemcuSwitch.onchange = ()=>sendRelayCommand(nodemcuSwitch.checked,"nodemcu",nodemcuSwitch,nodemcu_light);
+
+// Fetch latest data
+async function fetchLatestData() {
+    try {
+        const r = await fetch('/api/latest/');
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        return await r.json();
+    } catch(e){ console.error(e); return null; }
+}
+
+// Polling loop
+setInterval(async ()=>{
+    const data = await fetchLatestData();
+    if(!data) return;
+
+    const isConnected = data.is_connected;
+    const ip = data.nodemcu_ip;
+    if(isConnected!==lastConnectedStatus){
+        lastConnectedStatus = isConnected;
+        connectionStatusEl.textContent = isConnected?"CONNECTED":"WAITING...";
+        connectionStatusEl.className = isConnected?"status-connected":"status-disconnected";
+        ipDisplayEl.textContent = isConnected?`NodeMCU IP: ${ip}`:"NodeMCU IP: Searching...";
+        ipDisplayEl.style.color = isConnected?"#00ff9d":"#ff0066";
+    }
+
+    const a = data.arduino.arduino_relay;
+    const n = data.nodemcu.nodemcu_relay;
+    const isIndividual = modeToggle.checked;
+
+    // Sync switches without flicker
+    if(!isIndividual && !commandPending.common) commonSwitch.checked = a && n;
+    if(isIndividual){
+        if(!commandPending.arduino) arduinoSwitch.checked = a;
+        if(!commandPending.nodemcu) nodemcuSwitch.checked = n;
+    }
+
+    // Update lights
+    arduino_light.src = a ? "https://via.placeholder.com/120/00ff00/000000?text=ON"
+                          : "https://via.placeholder.com/120/ff0066/000000?text=OFF";
+    nodemcu_light.src = n ? "https://via.placeholder.com/120/00ff00/000000?text=ON"
+                          : "https://via.placeholder.com/120/ff0066/000000?text=OFF";
+    piezo_light.src = data.arduino.piezo_relay ? "https://via.placeholder.com/120/00ff00/000000?text=ON"
+                                               : "https://via.placeholder.com/120/ff0066/000000?text=OFF";
+
+    // Update sensor values
+    arduinoIr1El.textContent = data.arduino.ir1 ?? "—";
+    arduinoIr2El.textContent = data.arduino.ir2 ?? "—";
+    nodemcuIr1El.textContent = data.nodemcu.ir1 ?? "—";
+    nodemcuIr2El.textContent = data.nodemcu.ir2 ?? "—";
+    piezoEl.textContent = data.arduino.piezo?.toFixed(1) ?? "0.0";
+    speedEl.textContent = data.arduino.speed?.toFixed(1) ?? "0.0";
+
+    // Speed gauge
+    const speed = data.arduino.speed || 0;
+    const gaugeColor = speed<20?"#00ff00":speed<50?"#ffff00":"#ff0000";
+    Plotly.react(speedGaugeEl,[{
+        type:"indicator",
+        mode:"gauge+number+delta",
+        value:speed,
+        number:{suffix:" km/h"},
+        gauge:{
+            axis:{range:[0,100]}, bar:{color:gaugeColor},
+            bgcolor:"black", borderwidth:2, bordercolor:"cyan",
+            steps:[
+                {range:[0,20], color:"darkgreen"},
+                {range:[20,50], color:"orange"},
+                {range:[50,100], color:"darkred"}
+            ]
+        }
+    }], {paper_bgcolor:"rgba(0,0,0,0)", font:{color:"#00ffff",family:"Orbitron"}, height:300, margin:{t:40,b:0,l:20,r:20}});
+}, fetchInterval);
+
+// Init
+async function init(){
+    modeToggle.checked=false;
+    commonControls.style.display='block';
+    individualControls.style.display='none';
+    const data = await fetchLatestData();
+    if(!data) return;
+    arduinoSwitch.checked = data.arduino.arduino_relay;
+    nodemcuSwitch.checked = data.nodemcu.nodemcu_relay;
+    commonSwitch.checked = data.arduino.arduino_relay && data.nodemcu.nodemcu_relay;
+}
+window.onload = init;
 </script>
 
 </body>

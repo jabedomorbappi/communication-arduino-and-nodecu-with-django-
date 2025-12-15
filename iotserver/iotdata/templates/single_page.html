@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle IoT Control & Analytics Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #4f46e5; /* Indigo for professional accent */
+            --primary-light: #6366f1;
+            --secondary: #06b6d4; /* Cyan accent */
+            --success: #10b981; 
+            --warning: #f59e0b; 
+            --danger: #ef4444; 
+            --dark: #1e293b; /* Slate dark for bg */
+            --darker: #0f172a; 
+            --light: #f1f5f9; /* Light slate text */
+            --glass: rgba(248, 250, 252, 0.85); /* Light glass for professional clean look */
+            --glass-dark: rgba(30, 41, 59, 0.85);
+            --border: #e2e8f0;
+            --glow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); /* Subtle light gradient for professional bg */
+            color: var(--dark); 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Navigation - Professional sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--dark);
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            padding: 24px 0;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+        .sidebar .logo {
+            text-align: center;
+            padding: 24px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            background: var(--primary);
+            margin-bottom: 32px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0 16px;
+        }
+        .sidebar li {
+            margin: 4px 0;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-radius: 8px;
+            margin: 4px 8px;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+        .sidebar i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--glow);
+        }
+        .header h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+        .header h1 i { margin-right: 8px; color: var(--primary); }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-connected { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .status-disconnected { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+
+        /* Glass Cards - Professional clean cards */
+        .glass-container {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--glow);
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+        .section-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i { color: var(--primary); }
+
+        /* Controls Grid */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .control-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: var(--glow);
+        }
+        .control-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .control-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 30px;
+            margin: 8px 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .light-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 12px auto 0;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+            display: block;
+        }
+        .light-on { background: var(--success); border-color: var(--success); box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+        .light-off { background: #f1f5f9; }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .metric-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: var(--glow);
+        }
+        .metric-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .metric-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            height: 280px;
+            box-shadow: var(--glow);
+        }
+        .speed-gauge {
+            height: 100% !important;
+            width: 100% !important;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeInUp 0.6s ease-out; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .controls-grid, .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .header { flex-direction: column; gap: 16px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo">
+        <i class="fas fa-car-side"></i> PCIU IoT
+    </div>
+    <ul>
+        <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="#"><i class="fas fa-users"></i> Team</a></li>
+        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+        <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+        <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-car-side"></i> Vehicle IoT Dashboard</h1>
+        <div class="status-badge" id="connection-status">
+            <i class="fas fa-circle"></i> Waiting...
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="glass-container fade-in">
+        <h2 class="section-title"><i class="fas fa-plug"></i> Connection Status</h2>
+        <p style="font-size: 1rem; margin-top: 8px; color: #64748b;">System: <span id="system-status">WAITING...</span></p>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="glass-container fade-in">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i> Light Controls</h2>
+        <div class="controls-grid">
+            <div class="control-card">
+                <h3>Common Light</h3>
+                <label class="switch">
+                    <input type="checkbox" id="commonSwitch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="control-card">
+                <h3>Arduino Relay</h3>
+                <label class="switch">
+                    <input type="checkbox" id="arduinoSwitch">
+                    <span class="slider"></span>
+                </label>
+                <img id="arduino_light" class="light-img light-off" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjYiIGZpbGw9IiNmMWY1ZjkiIHN0cm9rZT0iI2UyZThmMCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjMwIiB5PSIzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiI+UEZGMDwvdGV4dD4KPC9zdmc+" alt="OFF">
+            </div>
+            <div class="control-card">
+                <h3>NodeMCU Relay</h3>
+                <label class="switch">
+                    <input type="checkbox" id="nodemcuSwitch">
+                    <span class="slider"></span>
+                </label>
+                <img id="nodemcu_light" class="light-img light-off" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjYiIGZpbGw9IiNmMWY1ZjkiIHN0cm9rZT0iI2UyZThmMCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjMwIiB5PSIzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiI+UEZGMDwvdGV4dD4KPC9zdmc+" alt="OFF">
+            </div>
+            <div class="control-card">
+                <h3>Piezo Relay</h3>
+                <label class="switch">
+                    <input type="checkbox" id="piezoSwitch">
+                    <span class="slider"></span>
+                </label>
+                <img id="piezo_light" class="light-img light-off" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjYiIGZpbGw9IiNmMWY1ZjkiIHN0cm9rZT0iI2UyZThmMCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjMwIiB5PSIzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiI+UEZGMDwvdGV4dD4KPC9zdmc+" alt="OFF">
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Section -->
+    <div class="glass-container fade-in">
+        <h2 class="section-title"><i class="fas fa-chart-bar"></i> Real-Time Metrics</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="arduino_ir1">—</div>
+                <div class="metric-label">Arduino IR1</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="nodemcu_ir1">—</div>
+                <div class="metric-label">NodeMCU IR1</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="arduino_ir2">—</div>
+                <div class="metric-label">Arduino IR2</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="nodemcu_ir2">—</div>
+                <div class="metric-label">NodeMCU IR2</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="piezo">0.0</div>
+                <div class="metric-label">Vibration</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="speed">0.0</div>
+                <div class="metric-label">Velocity km/h</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="latency">0.0</div>
+                <div class="metric-label">Latency ms</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="glass-container fade-in">
+        <h2 class="section-title"><i class="fas fa-chart-pie"></i> Analytics</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div id="speed-gauge" class="speed-gauge"></div>
+            </div>
+            <div class="chart-container">
+                <div id="vibration-chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let lastSeen = 0;
+let vibrationData = { x: [], y: [] };
+
+// Switch Event Listeners
+document.getElementById("commonSwitch").onchange = function() {
+    const state = this.checked;
+    fetch('/api/control/relay/', {
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({state: state, type: "common"})
+    }).catch(console.error);
+    document.getElementById("arduinoSwitch").checked = state;
+    document.getElementById("nodemcuSwitch").checked = state;
+};
+
+document.getElementById("arduinoSwitch").onchange = function() {
+    fetch('/api/control/relay/', {
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({state: this.checked, type: "arduino"})
+    }).catch(console.error);
+};
+
+document.getElementById("nodemcuSwitch").onchange = function() {
+    fetch('/api/control/relay/', {
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({state: this.checked, type: "nodemcu"})
+    }).catch(console.error);
+};
+
+document.getElementById("piezoSwitch").onchange = function() {
+    fetch('/api/control/relay/', {
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({state: this.checked, type: "piezo"})
+    }).catch(console.error);
+};
+
+// Data Polling
+setInterval(() => {
+    fetch('/api/latest/')
+    .then(r => r.json())
+    .then(d => {
+        if (!d) return;
+        lastSeen = Date.now();
+
+        // Update Metrics
+        ['arduino_ir1', 'arduino_ir2', 'nodemcu_ir1', 'nodemcu_ir2'].forEach(key => {
+            document.getElementById(key).textContent = d.arduino?.[key.replace('ir', 'ir')] || d.nodemcu?.[key.replace('ir', 'ir')] || '—';
+        });
+        document.getElementById("piezo").textContent = (d.arduino?.piezo || 0).toFixed(1);
+        document.getElementById("speed").textContent = (d.arduino?.speed || 0).toFixed(1);
+        document.getElementById("latency").textContent = (d.latency || 0).toFixed(1);
+
+        // Update Lights
+        const updateLight = (id, state) => {
+            const img = document.getElementById(id);
+            img.className = state ? 'light-img light-on' : 'light-img light-off';
+            img.src = state ? 
+                `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjYiIGZpbGw9IiMxMGI5ODEiIHN0cm9rZT0iIzEwYjk4MSIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjMwIiB5PSIzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZmZmZiI+T04wPC90ZXh0Pgo8L3N2Zz4=` :
+                `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjYiIGZpbGw9IiNmMWY1ZjkiIHN0cm9rZT0iI2UyZThmMCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjMwIiB5PSIzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiI+UEZGMDwvdGV4dD4KPC9zdmc+`;
+        };
+        updateLight('arduino_light', d.arduino?.arduino_relay || false);
+        updateLight('nodemcu_light', d.nodemcu?.nodemcu_relay || false);
+        updateLight('piezo_light', d.arduino?.piezo_relay || false);
+
+        // Update Switches
+        document.getElementById("arduinoSwitch").checked = d.arduino?.arduino_relay || false;
+        document.getElementById("nodemcuSwitch").checked = d.nodemcu?.nodemcu_relay || false;
+        document.getElementById("piezoSwitch").checked = d.arduino?.piezo_relay || false;
+
+        // Connection Status
+        const seconds = (Date.now() - lastSeen) / 1000;
+        const statusEl = document.getElementById("connection-status");
+        const systemStatus = document.getElementById("system-status");
+        if (seconds < 5) {
+            statusEl.innerHTML = '<i class="fas fa-circle"></i> Active';
+            statusEl.className = 'status-badge status-connected';
+            systemStatus.textContent = 'Connected';
+            systemStatus.style.color = 'var(--success)';
+        } else {
+            statusEl.innerHTML = '<i class="fas fa-circle"></i> Disconnected';
+            statusEl.className = 'status-badge status-disconnected';
+            systemStatus.textContent = `Offline ${Math.floor(seconds)}s`;
+            systemStatus.style.color = 'var(--danger)';
+        }
+
+        // Speed Gauge
+        Plotly.react('speed-gauge', [{
+            type: 'indicator',
+            mode: 'gauge+number',
+            value: d.arduino?.speed || 0,
+            title: { text: 'Speed (km/h)', font: { size: 14, color: '#64748b' } },
+            gauge: {
+                axis: { range: [0, 200] },
+                bar: { color: var(--primary) },
+                steps: [
+                    { range: [0, 100], color: 'rgba(16,185,129,0.2)' },
+                    { range: [100, 150], color: 'rgba(245,158,11,0.2)' },
+                    { range: [150, 200], color: 'rgba(239,68,68,0.2)' }
+                ],
+                threshold: { line: { color: 'var(--danger)', width: 4 }, value: 180 }
+            }
+        }], {
+            height: 240,
+            margin: { t: 40, b: 40 },
+            paper_bgcolor: 'transparent',
+            font: { color: '#1e293b' }
+        });
+
+        // Vibration Chart
+        const now = new Date().toLocaleTimeString();
+        vibrationData.x.push(now);
+        vibrationData.y.push(d.arduino?.piezo || 0);
+        if (vibrationData.x.length > 20) {
+            vibrationData.x.shift();
+            vibrationData.y.shift();
+        }
+        Plotly.react('vibration-chart', [{
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Vibration',
+            x: vibrationData.x,
+            y: vibrationData.y,
+            line: { color: var(--primary), width: 2 }
+        }], {
+            title: { text: 'Vibration Levels', font: { size: 14, color: '#64748b' } },
+            xaxis: { title: 'Time', color: '#64748b' },
+            yaxis: { title: 'Amplitude', color: '#64748b' },
+            plot_bgcolor: 'transparent',
+            paper_bgcolor: 'transparent',
+            font: { color: '#1e293b' },
+            height: 240,
+            margin: { t: 40, b: 40 }
+        });
+    }).catch(err => console.error('Fetch error:', err));
+}, 2000);  // Poll every 2s for stability
+
+// Initial Animations
+gsap.from('.sidebar', { x: -260, duration: 0.8, ease: 'power3.out' });
+gsap.from('.header', { y: -30, opacity: 0, duration: 0.8, delay: 0.2 });
+gsap.from('.glass-container', { 
+    y: 30, 
+    opacity: 0, 
+    duration: 0.8, 
+    stagger: 0.1,
+    delay: 0.4,
+    ease: 'power3.out'
+});
+</script>
+
+</body>
+</html>
